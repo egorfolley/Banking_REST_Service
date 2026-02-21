@@ -236,6 +236,7 @@
             <div class="cards-grid">
               <div class="cards-panel">
                 <h3>Cards</h3>
+                <p id="cardsBalance" class="tab-desc" style="margin: 6px 0 0;">Available: $0.00</p>
                 <div id="cardsList" class="cards-list"></div>
               </div>
               <div class="cards-panel">
@@ -248,7 +249,6 @@
                     </select>
                     <button id="createCardBtn">Issue Card</button>
                   </div>
-                  <pre id="cardsOutput" class="output"></pre>
                 </div>
               </div>
             </div>
@@ -268,6 +268,7 @@
         window.location.href = "/";
       }
       let availableCards = [];
+      let availableAccounts = [];
 
       function apiUrl(path) {
         return `${defaultBaseUrl}${path}`;
@@ -275,13 +276,6 @@
 
       function bind(id) {
         return document.getElementById(id);
-      }
-
-      function show(el, payload) {
-        if (!el) {
-          return;
-        }
-        el.textContent = JSON.stringify(payload, null, 2);
       }
 
       function setTokens(tokens) {
@@ -342,6 +336,25 @@
         return 100000;
       }
 
+      function formatCurrency(cents) {
+        const dollars = Number.isFinite(cents) ? cents / 100 : 0;
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(dollars);
+      }
+
+      function updateAvailableBalance() {
+        const balanceEl = bind("cardsBalance");
+        if (!balanceEl) {
+          return;
+        }
+        const accountId = bind("cardAccountId").value;
+        const account = availableAccounts.find((item) => item.id === accountId);
+        const balance = account ? formatCurrency(account.balance_cents) : "$0.00";
+        balanceEl.textContent = `Available: ${balance}`;
+      }
+
       function renderAccountOptions(accounts) {
         const select = bind("cardAccountId");
         if (!select) {
@@ -394,7 +407,6 @@
           btn.addEventListener("click", async () => {
             const action = btn.dataset.action;
             const cardId = btn.dataset.cardId;
-            const output = bind("cardsOutput");
             try {
               if (action === "freeze") {
                 const currentStatus = btn.dataset.status;
@@ -403,7 +415,6 @@
                   method: "PATCH",
                   body: JSON.stringify({ status: nextStatus }),
                 });
-                show(output, data);
                 await refreshCards();
               } else if (action === "delete") {
                 if (!confirm("Are you sure you want to delete this card?")) {
@@ -412,11 +423,10 @@
                 await api(`/api/v1/cards/${cardId}`, {
                   method: "DELETE",
                 });
-                show(output, { message: "Card deleted successfully" });
                 await refreshCards();
               }
             } catch (err) {
-              show(output, err);
+              console.error("Card action error:", err);
             }
           });
         });
@@ -424,7 +434,9 @@
 
       async function refreshAccounts() {
         const accounts = await api("/api/v1/accounts/");
+        availableAccounts = Array.isArray(accounts) ? accounts : [];
         renderAccountOptions(accounts);
+        updateAvailableBalance();
         return accounts;
       }
 
@@ -435,6 +447,7 @@
           if (workspace) {
             workspace.style.display = "none";
           }
+          updateAvailableBalance();
           renderCardsList([]);
           availableCards = [];
           return [];
@@ -442,6 +455,7 @@
         if (workspace) {
           workspace.style.display = "block";
         }
+        updateAvailableBalance();
         const data = await api("/api/v1/cards/");
         const cards = Array.isArray(data)
           ? data.filter((card) => card.account_id === accountId)
@@ -459,11 +473,10 @@
       });
 
       bind("createCardBtn").addEventListener("click", async () => {
-        const output = bind("cardsOutput");
         try {
           const accountId = bind("cardAccountId").value;
           if (!accountId) {
-            show(output, { error: "Select an account first." });
+            alert("Select an account first.");
             return;
           }
           const expiry = generateExpiry();
@@ -488,14 +501,14 @@
           });
           bind("cardType").value = "debit";
           await refreshCards();
-          show(output, data);
         } catch (err) {
           console.error("Card creation error:", err);
-          show(output, err);
+          alert("Unable to issue card. Please try again.");
         }
       });
 
       bind("cardAccountId").addEventListener("change", () => {
+        updateAvailableBalance();
         refreshCards().catch(() => {});
       });
 

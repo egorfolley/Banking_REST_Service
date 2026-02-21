@@ -92,17 +92,15 @@
         cursor: pointer;
       }
 
-      .output {
+      .error-message {
         margin-top: 12px;
-        min-height: 90px;
         padding: 12px;
         border-radius: 12px;
-        background: rgba(5, 8, 12, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        color: var(--muted);
-        font-size: 12px;
-        overflow-x: auto;
-        white-space: pre-wrap;
+        background: rgba(255, 107, 107, 0.12);
+        border: 1px solid #ff6b6b;
+        color: #ff6b6b;
+        font-size: 13px;
+        display: none;
       }
     </style>
   </head>
@@ -124,7 +122,7 @@
         <input id="authPassword" placeholder="password" type="password" />
         <button id="authSubmitBtn">Continue</button>
       </div>
-      <pre id="authOutput" class="output"></pre>
+      <div id="authMessage" class="error-message"></div>
     </section>
 
     <script>
@@ -142,8 +140,37 @@
         return `${defaultBaseUrl}${path}`;
       }
 
-      function show(el, payload) {
-        el.textContent = JSON.stringify(payload, null, 2);
+      function formatValidationDetail(detail) {
+        if (!Array.isArray(detail) || detail.length === 0) {
+          return null;
+        }
+        const first = detail[0];
+        if (first && typeof first.msg === "string") {
+          return first.msg;
+        }
+        return null;
+      }
+
+      function showError(msg) {
+        const el = bind("authMessage");
+        if (typeof msg === "string") {
+          el.textContent = msg;
+        } else if (msg && typeof msg === "object") {
+          const name = msg.error || msg.error_type || msg.name;
+          const validationMsg = formatValidationDetail(msg.detail);
+          const detail = validationMsg || msg.detail || msg.msg || msg.message;
+          const parts = [];
+          if (name && typeof name === "string") {
+            parts.push(name);
+          }
+          if (detail && typeof detail === "string") {
+            parts.push(detail);
+          }
+          el.textContent = parts.length ? parts.join(": ") : "Unable to complete request";
+        } else {
+          el.textContent = "";
+        }
+        el.style.display = el.textContent ? "block" : "none";
       }
 
       function bind(id) {
@@ -181,7 +208,7 @@
       }
 
       bind("authSubmitBtn").addEventListener("click", async () => {
-        const output = bind("authOutput");
+        showError("");
         try {
           const mode = bind("authMode").value;
           const email = bind("authEmail").value;
@@ -192,10 +219,10 @@
             body: JSON.stringify({ email, password }),
           });
           setTokens(data);
-          show(output, data);
           window.location.href = "/app";
         } catch (err) {
-          show(output, err);
+          const payload = err?.data && typeof err.data === "object" ? { ...err.data, status: err.status } : err;
+          showError(payload);
         }
       });
     </script>
