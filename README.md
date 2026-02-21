@@ -135,6 +135,6 @@ flowchart TD
 * [X] TC: Establish tech-stack - prompt to select the tech-stack for the project
 * [X] SC: Source code with core components for service/DB development, config files, test units
 * [X] BP: Test client application for the flow + UI
-* [ ] DocAI: Track progress of AI usage - report of tools, prompts, challenges solved with AI, manual interventions
-* [ ] DocSecurity: Security considerations document
+* [X] DocAI: Track progress of AI usage - report of tools, prompts, challenges solved with AI, manual interventions
+* [X] DocSecurity: Security considerations document
 * [ ] DocRoadmap: Roadmap document for future considerations
