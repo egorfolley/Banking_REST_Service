@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////app/app/data_db/banking.db
+      - JWT_SECRET_KEY=CHANGE_ME
+    volumes:
+      - ./:/app
