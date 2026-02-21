@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transfers</title>
+    <style>
+      :root {
+        --bg: #0c1117;
+        --panel: #121a24;
+        --panel-2: #1a2430;
+        --ink: #f7f3eb;
+        --muted: #9aa6b2;
+        --accent: #f6c453;
+        --accent-2: #4dd7bf;
+        --stroke: rgba(255, 255, 255, 0.08);
+        --radius: 16px;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, #1c2531, var(--bg));
+        min-height: 100vh;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 36px 6vw 20px;
+        align-items: center;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 0 6vw 10px;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(28px, 4vw, 46px);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        max-width: 520px;
+      }
+
+      main {
+        display: block;
+        padding: 20px 6vw 50px;
+      }
+
+      section {
+        background: rgba(18, 26, 36, 0.92);
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      section h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .tab-desc {
+        margin: -6px 0 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      input,
+      select,
+      button,
+      a {
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      input,
+      select {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: var(--panel-2);
+        color: var(--ink);
+      }
+
+      button,
+      .nav-link {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(120deg, var(--accent), #ff9f45);
+        color: #1a1405;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button.ghost,
+      .nav-link.ghost {
+        background: transparent;
+        border: 1px solid var(--stroke);
+        color: var(--ink);
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .output {
+        min-height: 90px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(5, 8, 12, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+
+      @media (max-width: 900px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Transfers</h1>
+        <p class="subtitle">Send money between accounts.</p>
+      </div>
+      <div class="header-actions">
+        <button id="logoutBtn" class="ghost">Logout</button>
+      </div>
+    </header>
+
+    <nav class="nav-links">
+      <a class="nav-link ghost" href="/app">Dashboard</a>
+      <a class="nav-link ghost" href="/accounts">Accounts</a>
+      <a class="nav-link" href="/transfers">Transfers</a>
+      <a class="nav-link ghost" href="/cards">Cards</a>
+    </nav>
+
+    <main>
+      <section>
+        <h2>Transfers</h2>
+        <p class="tab-desc">Transfer money from your accounts to any account in the system.</p>
+        <div class="stack">
+          <div class="row">
+            <select id="transferFrom">
+              <option value="">select from account</option>
+            </select>
+          </div>
+          <div id="accountDetails" style="display: none; margin-top: 12px; padding: 12px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--panel-2);">
+            <p style="margin: 0 0 8px; font-size: 14px;">
+              <strong>Funds available:</strong> <span id="fundsAvailable">$0.00</span>
+            </p>
+          </div>
+          <div id="transferFields" style="display: none; margin-top: 12px;">
+            <div class="row">
+              <input id="transferTo" placeholder="account UUID or account number" list="transferToList" />
+              <datalist id="transferToList"></datalist>
+            </div>
+            <div class="row">
+              <input id="transferAmount" placeholder="amount_cents" />
+            </div>
+            <div class="row">
+              <input id="transferDesc" placeholder="description" />
+              <button id="transferBtn">Send Transfer</button>
+            </div>
+          </div>
+          <pre id="transferOutput" class="output"></pre>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const defaultBaseUrl = window.location.origin;
+      const state = {
+        accessToken: localStorage.getItem("accessToken") || "",
+        refreshToken: localStorage.getItem("refreshToken") || "",
+      };
+      const sessionAuthed = sessionStorage.getItem("sessionAuthed") === "true";
+      if (!sessionAuthed || !state.accessToken) {
+        window.location.href = "/";
+      }
+      let availableAccounts = [];
+      let allAccounts = [];
+
+      function apiUrl(path) {
+        return `${defaultBaseUrl}${path}`;
+      }
+
+      function bind(id) {
+        return document.getElementById(id);
+      }
+
+      function show(el, payload) {
+        if (!el) {
+          return;
+        }
+        el.textContent = JSON.stringify(payload, null, 2);
+      }
+
+      function setTokens(tokens) {
+        state.accessToken = tokens.access_token || "";
+        state.refreshToken = tokens.refresh_token || "";
+        localStorage.setItem("accessToken", state.accessToken);
+        localStorage.setItem("refreshToken", state.refreshToken);
+        if (state.accessToken) {
+          sessionStorage.setItem("sessionAuthed", "true");
+        }
+      }
+
+      async function api(path, options = {}) {
+        const headers = options.headers || {};
+        if (state.accessToken) {
+          headers.Authorization = `Bearer ${state.accessToken}`;
+        }
+        const url = apiUrl(path);
+        const res = await fetch(url, {
+          ...options,
+          headers: { "Content-Type": "application/json", ...headers },
+        });
+        const text = await res.text();
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (err) {
+          data = { raw: text };
+        }
+        if (!res.ok) {
+          throw { status: res.status, data };
+        }
+        return data;
+      }
+
+      function clearInputs(ids) {
+        ids.forEach((id) => {
+          const el = bind(id);
+          if (el) {
+            el.value = "";
+          }
+        });
+      }
+
+      function renderTransferFromOptions(accounts) {
+        const select = bind("transferFrom");
+        if (!select) {
+          return;
+        }
+        const current = select.value;
+        const options = [
+          '<option value="">select from account</option>',
+          ...accounts.map(
+            (account) =>
+              `<option value="${account.id}">${account.account_number} (${account.account_type})</option>`
+          ),
+        ];
+        select.innerHTML = options.join("");
+        if (current && accounts.some((account) => account.id === current)) {
+          select.value = current;
+        }
+      }
+
+      function renderTransferToOptions(accounts) {
+        const datalist = bind("transferToList");
+        if (!datalist) {
+          return;
+        }
+        const fromAccountId = bind("transferFrom").value;
+        
+        // Filter out the source account to prevent self-transfers
+        const filteredAccounts = accounts.filter((acc) => acc.id !== fromAccountId);
+        
+        const options = filteredAccounts
+          .map(
+            (account) =>
+              `<option value="${account.id}">${account.account_number}</option>`
+          )
+          .join("");
+        datalist.innerHTML = options;
+      }
+
+      async function refreshAccounts() {
+        const accounts = await api("/api/v1/accounts/");
+        availableAccounts = accounts;
+        renderTransferFromOptions(accounts);
+      }
+
+      async function refreshAllAccounts() {
+        // Fetch all active accounts in the system (including other users)
+        try {
+          const allAccountsData = await api("/api/v1/accounts/all");
+          allAccounts = Array.isArray(allAccountsData) ? allAccountsData : [];
+        } catch (err) {
+          // Fallback: use only user's accounts if all-accounts endpoint doesn't exist
+          allAccounts = availableAccounts;
+        }
+        renderTransferToOptions(allAccounts);
+      }
+
+      bind("logoutBtn").addEventListener("click", () => {
+        setTokens({});
+        sessionStorage.removeItem("sessionAuthed");
+        sessionStorage.removeItem("userId");
+        window.location.href = "/";
+      });
+
+      function formatCurrency(cents) {
+        const dollars = cents / 100;
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(dollars);
+      }
+
+      bind("transferFrom").addEventListener("change", () => {
+        const selectedId = bind("transferFrom").value;
+        const accountDetails = bind("accountDetails");
+        const transferFields = bind("transferFields");
+        
+        if (!selectedId) {
+          accountDetails.style.display = "none";
+          transferFields.style.display = "none";
+          renderTransferToOptions(allAccounts);
+          return;
+        }
+        
+        const selectedAccount = availableAccounts.find((acc) => acc.id === selectedId);
+        if (selectedAccount) {
+          bind("fundsAvailable").textContent = formatCurrency(selectedAccount.balance_cents);
+          accountDetails.style.display = "block";
+          transferFields.style.display = "block";
+        }
+        
+        renderTransferToOptions(allAccounts);
+      });
+
+      bind("transferBtn").addEventListener("click", async () => {
+        const output = bind("transferOutput");
+        try {
+          const fromAccountId = bind("transferFrom").value;
+          const isAllowed = availableAccounts.some((account) => account.id === fromAccountId);
+          if (!fromAccountId || !isAllowed) {
+            show(output, { error: "Select one of your accounts first." });
+            return;
+          }
+          
+          let toAccountId = bind("transferTo").value.trim();
+          if (!toAccountId) {
+            show(output, { error: "Enter a destination account UUID or account number." });
+            return;
+          }
+          
+          // Check if input is a UUID or account number
+          const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (!uuidPattern.test(toAccountId)) {
+            // Assume it's an account number, resolve to UUID
+            const account = allAccounts.find((acc) => acc.account_number === toAccountId);
+            if (!account) {
+              show(output, { error: `Account "${toAccountId}" not found.` });
+              return;
+            }
+            toAccountId = account.id;
+          }
+          
+          // Verify destination account exists
+          const destExists = allAccounts.some((acc) => acc.id === toAccountId);
+          if (!destExists) {
+            show(output, { error: "Destination account not found." });
+            return;
+          }
+          
+          // Prevent self-transfer
+          if (fromAccountId === toAccountId) {
+            show(output, { error: "Cannot transfer to the same account." });
+            return;
+          }
+          
+          const data = await api("/api/v1/transfers/", {
+            method: "POST",
+            body: JSON.stringify({
+              from_account_id: fromAccountId,
+              to_account_id: toAccountId,
+              amount_cents: Number(bind("transferAmount").value),
+              description: bind("transferDesc").value || null,
+            }),
+          });
+          clearInputs([
+            "transferFrom",
+            "transferTo",
+            "transferAmount",
+            "transferDesc",
+          ]);
+          bind("transferFrom").value = "";
+          bind("transferTo").value = "";
+          bind("accountDetails").style.display = "none";
+          bind("transferFields").style.display = "none";
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      (async () => {
+        try {
+          await refreshAccounts();
+          await refreshAllAccounts();
+        } catch (err) {
+          return;
+        }
+      })();
+    </script>
+  </body>
+</html>

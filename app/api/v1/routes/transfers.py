@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 from app.core.deps import get_account_for_user, get_current_user, get_db
 from app.models.account import Account
@@ -20,7 +21,8 @@ def transfer_funds(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    existing = db.scalar(select(Transfer).where(Transfer.idempotency_key == payload.idempotency_key))
+    idempotency_key = payload.idempotency_key or str(uuid4())
+    existing = db.scalar(select(Transfer).where(Transfer.idempotency_key == idempotency_key))
     if existing:
         get_account_for_user(existing.from_account_id, current_user, db)
         return existing
@@ -36,7 +38,7 @@ def transfer_funds(
         db,
         from_account,
         to_account,
-        idempotency_key=payload.idempotency_key,
+        idempotency_key=idempotency_key,
         amount_cents=payload.amount_cents,
         description=payload.description,
     )

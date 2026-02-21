@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cards</title>
+    <style>
+      :root {
+        --bg: #0c1117;
+        --panel: #121a24;
+        --panel-2: #1a2430;
+        --ink: #f7f3eb;
+        --muted: #9aa6b2;
+        --accent: #f6c453;
+        --accent-2: #4dd7bf;
+        --stroke: rgba(255, 255, 255, 0.08);
+        --radius: 16px;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, #1c2531, var(--bg));
+        min-height: 100vh;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 36px 6vw 20px;
+        align-items: center;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 0 6vw 10px;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(28px, 4vw, 46px);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        max-width: 520px;
+      }
+
+      main {
+        display: block;
+        padding: 20px 6vw 50px;
+      }
+
+      section {
+        background: rgba(18, 26, 36, 0.92);
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      section h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .tab-desc {
+        margin: -6px 0 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      input,
+      select,
+      button,
+      a {
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      input,
+      select {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: var(--panel-2);
+        color: var(--ink);
+      }
+
+      button,
+      .nav-link {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(120deg, var(--accent), #ff9f45);
+        color: #1a1405;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button.ghost,
+      .nav-link.ghost {
+        background: transparent;
+        border: 1px solid var(--stroke);
+        color: var(--ink);
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .output {
+        min-height: 90px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(5, 8, 12, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .cards-panel {
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(18, 26, 36, 0.7);
+      }
+
+      .cards-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .card-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: var(--panel-2);
+      }
+
+      .card-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 13px;
+      }
+
+      .card-meta span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      @media (max-width: 900px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .cards-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Cards</h1>
+        <p class="subtitle">Issue cards for accounts and freeze them when needed.</p>
+      </div>
+      <div class="header-actions">
+        <button id="logoutBtn" class="ghost">Logout</button>
+      </div>
+    </header>
+
+    <nav class="nav-links">
+      <a class="nav-link ghost" href="/app">Dashboard</a>
+      <a class="nav-link ghost" href="/accounts">Accounts</a>
+      <a class="nav-link ghost" href="/transfers">Transfers</a>
+      <a class="nav-link" href="/cards">Cards</a>
+    </nav>
+
+    <main>
+      <section>
+        <h2>Cards</h2>
+        <p class="tab-desc">Issue cards, list them, and freeze by card ID.</p>
+        <div class="stack">
+          <div class="row">
+            <select id="cardAccountId">
+              <option value="">select account</option>
+            </select>
+          </div>
+          <div id="cardsWorkspace" style="display: none;">
+            <div class="cards-grid">
+              <div class="cards-panel">
+                <h3>Cards</h3>
+                <div id="cardsList" class="cards-list"></div>
+              </div>
+              <div class="cards-panel">
+                <h3>Issue New Card</h3>
+                <div class="stack">
+                  <div class="row">
+                    <select id="cardType">
+                      <option value="debit">debit</option>
+                      <option value="credit">credit</option>
+                    </select>
+                    <button id="createCardBtn">Issue Card</button>
+                  </div>
+                  <pre id="cardsOutput" class="output"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const defaultBaseUrl = window.location.origin;
+      const state = {
+        accessToken: localStorage.getItem("accessToken") || "",
+        refreshToken: localStorage.getItem("refreshToken") || "",
+      };
+      const sessionAuthed = sessionStorage.getItem("sessionAuthed") === "true";
+      if (!sessionAuthed || !state.accessToken) {
+        window.location.href = "/";
+      }
+      let availableCards = [];
+
+      function apiUrl(path) {
+        return `${defaultBaseUrl}${path}`;
+      }
+
+      function bind(id) {
+        return document.getElementById(id);
+      }
+
+      function show(el, payload) {
+        if (!el) {
+          return;
+        }
+        el.textContent = JSON.stringify(payload, null, 2);
+      }
+
+      function setTokens(tokens) {
+        state.accessToken = tokens.access_token || "";
+        state.refreshToken = tokens.refresh_token || "";
+        localStorage.setItem("accessToken", state.accessToken);
+        localStorage.setItem("refreshToken", state.refreshToken);
+        if (state.accessToken) {
+          sessionStorage.setItem("sessionAuthed", "true");
+        }
+      }
+
+      async function api(path, options = {}) {
+        const headers = options.headers || {};
+        if (state.accessToken) {
+          headers.Authorization = `Bearer ${state.accessToken}`;
+        }
+        const url = apiUrl(path);
+        const res = await fetch(url, {
+          ...options,
+          headers: { "Content-Type": "application/json", ...headers },
+        });
+        const text = await res.text();
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (err) {
+          data = { raw: text };
+        }
+        if (!res.ok) {
+          throw { status: res.status, data };
+        }
+        return data;
+      }
+
+      function clearInputs(ids) {
+        ids.forEach((id) => {
+          const el = bind(id);
+          if (el) {
+            el.value = "";
+          }
+        });
+      }
+
+      function generateCardNumber() {
+        const digits = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10));
+        return digits.join("");
+      }
+
+      function generateExpiry() {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const year = String(now.getFullYear() + 3);
+        return { month, year };
+      }
+
+      function generateDailyLimit() {
+        return 100000;
+      }
+
+      function renderAccountOptions(accounts) {
+        const select = bind("cardAccountId");
+        if (!select) {
+          return;
+        }
+        const current = select.value;
+        const options = [
+          '<option value="">select account</option>',
+          ...accounts.map(
+            (account) =>
+              `<option value="${account.id}">${account.account_number} (${account.account_type})</option>`
+          ),
+        ];
+        select.innerHTML = options.join("");
+        if (current && accounts.some((account) => account.id === current)) {
+          select.value = current;
+        }
+      }
+
+      function renderCardsList(cards) {
+        const list = bind("cardsList");
+        if (!list) {
+          return;
+        }
+        if (!cards.length) {
+          list.textContent = "No cards issued for this account yet.";
+          return;
+        }
+        list.innerHTML = cards
+          .map((card) => {
+            const lastFour = card.card_number_last_four || "????";
+            const label = `Card ****${lastFour}`;
+            const actionLabel = card.status === "frozen" ? "Unfreeze" : "Freeze";
+            return `
+              <div class="card-row" data-card="${card.id}">
+                <div class="card-meta">
+                  <strong>${label}</strong>
+                  <span>${card.card_type} • ${card.status}</span>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button class="ghost" data-action="freeze" data-card-id="${card.id}" data-status="${card.status}">${actionLabel}</button>
+                  <button class="ghost" data-action="delete" data-card-id="${card.id}" style="color: #ff6b6b;">Remove</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        list.querySelectorAll("button[data-action]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const action = btn.dataset.action;
+            const cardId = btn.dataset.cardId;
+            const output = bind("cardsOutput");
+            try {
+              if (action === "freeze") {
+                const currentStatus = btn.dataset.status;
+                const nextStatus = currentStatus === "frozen" ? "active" : "frozen";
+                const data = await api(`/api/v1/cards/${cardId}/status`, {
+                  method: "PATCH",
+                  body: JSON.stringify({ status: nextStatus }),
+                });
+                show(output, data);
+                await refreshCards();
+              } else if (action === "delete") {
+                if (!confirm("Are you sure you want to delete this card?")) {
+                  return;
+                }
+                await api(`/api/v1/cards/${cardId}`, {
+                  method: "DELETE",
+                });
+                show(output, { message: "Card deleted successfully" });
+                await refreshCards();
+              }
+            } catch (err) {
+              show(output, err);
+            }
+          });
+        });
+      }
+
+      async function refreshAccounts() {
+        const accounts = await api("/api/v1/accounts/");
+        renderAccountOptions(accounts);
+        return accounts;
+      }
+
+      async function refreshCards() {
+        const accountId = bind("cardAccountId").value;
+        const workspace = bind("cardsWorkspace");
+        if (!accountId) {
+          if (workspace) {
+            workspace.style.display = "none";
+          }
+          renderCardsList([]);
+          availableCards = [];
+          return [];
+        }
+        if (workspace) {
+          workspace.style.display = "block";
+        }
+        const data = await api("/api/v1/cards/");
+        const cards = Array.isArray(data)
+          ? data.filter((card) => card.account_id === accountId)
+          : [];
+        availableCards = cards;
+        renderCardsList(cards);
+        return cards;
+      }
+
+      bind("logoutBtn").addEventListener("click", () => {
+        setTokens({});
+        sessionStorage.removeItem("sessionAuthed");
+        sessionStorage.removeItem("userId");
+        window.location.href = "/";
+      });
+
+      bind("createCardBtn").addEventListener("click", async () => {
+        const output = bind("cardsOutput");
+        try {
+          const accountId = bind("cardAccountId").value;
+          if (!accountId) {
+            show(output, { error: "Select an account first." });
+            return;
+          }
+          const expiry = generateExpiry();
+          const cardNumber = generateCardNumber();
+          const cardType = bind("cardType").value;
+          const dailyLimit = generateDailyLimit();
+          
+          const payload = {
+            account_id: accountId,
+            card_number: cardNumber,
+            card_type: cardType,
+            expiry_month: Number(expiry.month),
+            expiry_year: Number(expiry.year),
+            daily_limit: dailyLimit,
+          };
+          
+          console.log("Card creation payload:", payload);
+          
+          const data = await api("/api/v1/cards/", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          bind("cardType").value = "debit";
+          await refreshCards();
+          show(output, data);
+        } catch (err) {
+          console.error("Card creation error:", err);
+          show(output, err);
+        }
+      });
+
+      bind("cardAccountId").addEventListener("change", () => {
+        refreshCards().catch(() => {});
+      });
+
+
+      (async () => {
+        try {
+          await refreshAccounts();
+          await refreshCards();
+        } catch (err) {
+          return;
+        }
+      })();
+    </script>
+  </body>
+</html>

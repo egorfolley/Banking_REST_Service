@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -6,11 +7,11 @@ from app.models.enums import TransferStatus
 
 
 class TransferCreate(BaseModel):
-    idempotency_key: str = Field(min_length=8)
     from_account_id: str
     to_account_id: str
     amount_cents: int = Field(gt=0)
     description: str | None = None
+    idempotency_key: Optional[str] = None
 
     @field_validator("to_account_id")
     @classmethod

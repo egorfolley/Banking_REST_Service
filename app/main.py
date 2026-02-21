@@ -33,6 +33,18 @@ def create_app() -> FastAPI:
         def app_page():
             return FileResponse(frontend_dir / "app.html")
 
+        @app.get("/accounts")
+        def accounts_page():
+            return FileResponse(frontend_dir / "accounts.html")
+
+        @app.get("/transfers")
+        def transfers_page():
+            return FileResponse(frontend_dir / "transfers.html")
+
+        @app.get("/cards")
+        def cards_page():
+            return FileResponse(frontend_dir / "cards.html")
+
     @app.on_event("startup")
     def _startup() -> None:
         init_db()

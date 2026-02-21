@@ -34,6 +34,7 @@ def create_card(
     payload: CardCreate,
     request: Request,
     current_user: User = Depends(get_current_user),
+    holder=Depends(get_current_holder),
     db: Session = Depends(get_db),
 ):
     account = get_account_for_user(payload.account_id, current_user, db)
@@ -160,3 +161,27 @@ def update_card_limit(
     db.commit()
     db.refresh(card)
     return card
+
+
+@router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_card(
+    card_id: str,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    holder=Depends(get_current_holder),
+    db: Session = Depends(get_db),
+):
+    card = _get_card_for_holder(card_id, holder.id, db)
+    
+    log_action(
+        db,
+        user_id=current_user.id,
+        action="delete_card",
+        resource_type="card",
+        resource_id=card.id,
+        details=f"account_id={card.account_id}",
+        ip_address=request.client.host if request.client else None,
+    )
+    
+    db.delete(card)
+    db.commit()

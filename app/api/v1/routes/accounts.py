@@ -56,6 +56,14 @@ def list_accounts(
     return db.scalars(select(Account).where(Account.holder_id == holder.id)).all()
 
 
+@router.get("/all", response_model=list[AccountResponse])
+def list_all_accounts(
+    db: Session = Depends(get_db),
+):
+    """List all active accounts in the system (for transfer destinations)."""
+    return db.scalars(select(Account).where(Account.status == AccountStatus.active)).all()
+
+
 @router.get("/{account_id}", response_model=AccountResponse)
 def get_account(
     account_id: str,

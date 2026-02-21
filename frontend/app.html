@@ -13,12 +13,10 @@
         --muted: #9aa6b2;
         --accent: #f6c453;
         --accent-2: #4dd7bf;
-        --danger: #ef6b6b;
         --stroke: rgba(255, 255, 255, 0.08);
         --radius: 16px;
         --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
       }
-
       * {
         box-sizing: border-box;
       }
@@ -45,28 +43,6 @@
         gap: 12px;
       }
 
-      .tabs {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        padding: 0 6vw 10px;
-      }
-
-      .tab-btn {
-        padding: 8px 14px;
-        border-radius: 999px;
-        border: 1px solid var(--stroke);
-        background: rgba(18, 26, 36, 0.9);
-        color: var(--ink);
-        cursor: pointer;
-      }
-
-      .tab-btn.active {
-        background: linear-gradient(120deg, var(--accent), #ff9f45);
-        color: #1a1405;
-        border-color: transparent;
-      }
-
       h1 {
         margin: 0 0 6px;
         font-size: clamp(32px, 4vw, 52px);
@@ -74,7 +50,7 @@
 
       .subtitle {
         color: var(--muted);
-        max-width: 440px;
+        max-width: 520px;
       }
 
       main {
@@ -108,16 +84,13 @@
       }
 
       input,
-      select,
       button,
-      textarea {
+      a {
         font-family: inherit;
         font-size: 14px;
       }
 
-      input,
-      select,
-      textarea {
+      input {
         flex: 1;
         min-width: 120px;
         padding: 10px 12px;
@@ -127,7 +100,8 @@
         color: var(--ink);
       }
 
-      button {
+      button,
+      .nav-link {
         padding: 10px 14px;
         border: none;
         border-radius: 10px;
@@ -135,9 +109,14 @@
         color: #1a1405;
         font-weight: 600;
         cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      button.ghost {
+      button.ghost,
+      .nav-link.ghost {
         background: transparent;
         border: 1px solid var(--stroke);
         color: var(--ink);
@@ -149,29 +128,22 @@
         gap: 12px;
       }
 
-      .output {
-        min-height: 90px;
-        padding: 12px;
-        border-radius: 12px;
-        background: rgba(5, 8, 12, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+      .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin: 16px 0 24px;
+      }
+
+      .status {
         color: var(--muted);
-        font-size: 12px;
-        overflow-x: auto;
-        white-space: pre-wrap;
-      }
-
-      .tab-panel {
-        display: none;
-      }
-
-      .tab-panel.active {
-        display: block;
+        font-size: 13px;
       }
 
       @media (max-width: 900px) {
         header {
           flex-direction: column;
+          align-items: flex-start;
         }
       }
     </style>
@@ -180,124 +152,39 @@
     <header>
       <div>
         <h1>Banking Dashboard</h1>
-        <p class="subtitle">Manage your profile, accounts, transfers, and cards.</p>
+        <p class="subtitle">Review your profile and jump to accounts, transfers, or cards.</p>
       </div>
       <div class="header-actions">
         <button id="logoutBtn" class="ghost">Logout</button>
       </div>
     </header>
 
-    <nav class="tabs" id="appTabs">
-      <button class="tab-btn active" data-tab="profile">Profile</button>
-      <button class="tab-btn" data-tab="accounts">Accounts</button>
-      <button class="tab-btn" data-tab="transfers">Transfers</button>
-      <button class="tab-btn" data-tab="cards">Cards</button>
-    </nav>
-
     <main>
-      <section class="tab-panel active" data-panel="profile">
+      <section>
         <h2>Profile</h2>
-        <p class="tab-desc">Create your account holder profile before opening accounts.</p>
+        <p class="tab-desc">Your account holder details.</p>
         <div class="stack">
           <div class="row">
-            <input id="holderFirst" placeholder="first_name" />
-            <input id="holderLast" placeholder="last_name" />
+            <input id="holderFirst" placeholder="first_name" disabled />
+            <input id="holderLast" placeholder="last_name" disabled />
           </div>
           <div class="row">
-            <input id="holderDob" placeholder="YYYY-MM-DD" />
-            <input id="holderPhone" placeholder="phone" />
+            <input id="holderDob" placeholder="YYYY-MM-DD" disabled />
+            <input id="holderPhone" placeholder="phone" disabled />
           </div>
           <div class="row">
-            <input id="holderAddress" placeholder="address" />
-            <input id="holderSsn" placeholder="ssn_last_four" />
+            <input id="holderAddress" placeholder="address" disabled />
+            <input id="holderSsn" placeholder="ssn_last_four" disabled />
           </div>
-          <div class="row">
-            <button id="createHolderBtn">Create</button>
-            <button id="getHolderBtn" class="ghost">Get</button>
-          </div>
-          <pre id="holderOutput" class="output"></pre>
+          <div id="profileStatus" class="status"></div>
         </div>
       </section>
 
-      <section class="tab-panel" data-panel="accounts">
-        <h2>Accounts</h2>
-        <p class="tab-desc">Open accounts, deposit funds, and view transactions.</p>
-        <div class="stack">
-          <div class="row">
-            <select id="accountType">
-              <option value="checking">checking</option>
-              <option value="savings">savings</option>
-            </select>
-            <input id="accountCurrency" placeholder="currency" value="USD" />
-            <input id="initialDeposit" placeholder="initial_deposit_cents" />
-            <button id="createAccountBtn">Open Account</button>
-          </div>
-          <div class="row">
-            <input id="accountId" placeholder="account_id" />
-            <button id="getAccountBtn" class="ghost">Get</button>
-            <button id="listAccountsBtn" class="ghost">List</button>
-          </div>
-          <div class="row">
-            <input id="depositAmount" placeholder="deposit_amount_cents" />
-            <input id="depositDesc" placeholder="description" />
-            <button id="depositBtn">Deposit</button>
-          </div>
-          <div class="row">
-            <input id="txPage" placeholder="page" value="1" />
-            <input id="txPageSize" placeholder="page_size" value="20" />
-            <input id="txType" placeholder="transaction_type" />
-            <button id="listTxBtn" class="ghost">Transactions</button>
-          </div>
-          <pre id="accountsOutput" class="output"></pre>
-        </div>
-      </section>
-
-      <section class="tab-panel" data-panel="transfers">
-        <h2>Transfers</h2>
-        <p class="tab-desc">Move money between accounts with idempotent transfers.</p>
-        <div class="stack">
-          <div class="row">
-            <input id="transferKey" placeholder="idempotency_key" />
-            <input id="transferFrom" placeholder="from_account_id" />
-          </div>
-          <div class="row">
-            <input id="transferTo" placeholder="to_account_id" />
-            <input id="transferAmount" placeholder="amount_cents" />
-          </div>
-          <div class="row">
-            <input id="transferDesc" placeholder="description" />
-            <button id="transferBtn">Send Transfer</button>
-          </div>
-          <pre id="transferOutput" class="output"></pre>
-        </div>
-      </section>
-
-      <section class="tab-panel" data-panel="cards">
-        <h2>Cards</h2>
-        <p class="tab-desc">Issue cards for accounts and freeze when needed.</p>
-        <div class="stack">
-          <div class="row">
-            <input id="cardAccountId" placeholder="account_id" />
-            <input id="cardNumber" placeholder="card_number" />
-          </div>
-          <div class="row">
-            <select id="cardType">
-              <option value="debit">debit</option>
-              <option value="credit">credit</option>
-            </select>
-            <input id="cardExpiryMonth" placeholder="expiry_month" />
-            <input id="cardExpiryYear" placeholder="expiry_year" />
-            <input id="cardDailyLimit" placeholder="daily_limit" />
-            <button id="createCardBtn">Issue Card</button>
-          </div>
-          <div class="row">
-            <input id="cardId" placeholder="card_id" />
-            <button id="freezeCardBtn" class="ghost">Freeze</button>
-            <button id="listCardsBtn" class="ghost">List</button>
-          </div>
-          <pre id="cardsOutput" class="output"></pre>
-        </div>
-      </section>
+      <div class="nav-grid">
+        <a class="nav-link" href="/accounts">Accounts</a>
+        <a class="nav-link" href="/transfers">Transfers</a>
+        <a class="nav-link" href="/cards">Cards</a>
+      </div>
     </main>
 
     <script>
@@ -315,34 +202,8 @@
         return `${defaultBaseUrl}${path}`;
       }
 
-      function show(el, payload) {
-        el.textContent = JSON.stringify(payload, null, 2);
-      }
-
       function bind(id) {
         return document.getElementById(id);
-      }
-
-      function setActiveTab(tabName) {
-        document.querySelectorAll(".tab-btn").forEach((btn) => {
-          btn.classList.toggle("active", btn.dataset.tab === tabName);
-        });
-        document.querySelectorAll(".tab-panel").forEach((panel) => {
-          panel.classList.toggle("active", panel.dataset.panel === tabName);
-        });
-      }
-
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          setActiveTab(btn.dataset.tab);
-        });
-      });
-
-      function requireAuth() {
-        if (!state.accessToken) {
-          window.location.href = "/";
-          throw new Error("Sign in required");
-        }
       }
 
       function setTokens(tokens) {
@@ -378,311 +239,35 @@
         return data;
       }
 
-      function loadFormState() {
-        const ids = [
-          "holderFirst",
-          "holderLast",
-          "holderDob",
-          "holderPhone",
-          "holderAddress",
-          "holderSsn",
-          "accountType",
-          "accountCurrency",
-          "initialDeposit",
-          "accountId",
-          "depositAmount",
-          "depositDesc",
-          "txPage",
-          "txPageSize",
-          "txType",
-          "transferKey",
-          "transferFrom",
-          "transferTo",
-          "transferAmount",
-          "transferDesc",
-          "cardAccountId",
-          "cardNumber",
-          "cardType",
-          "cardExpiryMonth",
-          "cardExpiryYear",
-          "cardDailyLimit",
-          "cardId",
-        ];
-        ids.forEach((id) => {
-          const el = bind(id);
-          if (!el) {
-            return;
-          }
-          const stored = localStorage.getItem(`ui_${id}`);
-          if (stored !== null) {
-            el.value = stored;
-          }
-        });
-      }
-
-      function saveFormState() {
-        const ids = [
-          "holderFirst",
-          "holderLast",
-          "holderDob",
-          "holderPhone",
-          "holderAddress",
-          "holderSsn",
-          "accountType",
-          "accountCurrency",
-          "initialDeposit",
-          "accountId",
-          "depositAmount",
-          "depositDesc",
-          "txPage",
-          "txPageSize",
-          "txType",
-          "transferKey",
-          "transferFrom",
-          "transferTo",
-          "transferAmount",
-          "transferDesc",
-          "cardAccountId",
-          "cardNumber",
-          "cardType",
-          "cardExpiryMonth",
-          "cardExpiryYear",
-          "cardDailyLimit",
-          "cardId",
-        ];
-        ids.forEach((id) => {
-          const el = bind(id);
-          if (!el) {
-            return;
-          }
-          localStorage.setItem(`ui_${id}`, el.value || "");
-        });
-      }
-
-      [
-        "holderFirst",
-        "holderLast",
-        "holderDob",
-        "holderPhone",
-        "holderAddress",
-        "holderSsn",
-        "accountType",
-        "accountCurrency",
-        "initialDeposit",
-        "accountId",
-        "depositAmount",
-        "depositDesc",
-        "txPage",
-        "txPageSize",
-        "txType",
-        "transferKey",
-        "transferFrom",
-        "transferTo",
-        "transferAmount",
-        "transferDesc",
-        "cardAccountId",
-        "cardNumber",
-        "cardType",
-        "cardExpiryMonth",
-        "cardExpiryYear",
-        "cardDailyLimit",
-        "cardId",
-      ].forEach((id) => {
-        const el = bind(id);
-        if (!el) {
+      function populateProfile(profile) {
+        if (!profile) {
           return;
         }
-        el.addEventListener("input", saveFormState);
-        el.addEventListener("change", saveFormState);
-      });
+        bind("holderFirst").value = profile.first_name || "";
+        bind("holderLast").value = profile.last_name || "";
+        bind("holderDob").value = profile.date_of_birth || "";
+        bind("holderPhone").value = profile.phone || "";
+        bind("holderAddress").value = profile.address || "";
+        bind("holderSsn").value = profile.ssn_last_four || "";
+      }
 
       bind("logoutBtn").addEventListener("click", () => {
         setTokens({});
         sessionStorage.removeItem("sessionAuthed");
+        sessionStorage.removeItem("userId");
         window.location.href = "/";
       });
 
-      bind("createHolderBtn").addEventListener("click", async () => {
-        const output = bind("holderOutput");
+      (async () => {
+        const statusEl = bind("profileStatus");
         try {
-          requireAuth();
-          const payload = {
-            first_name: bind("holderFirst").value,
-            last_name: bind("holderLast").value,
-            date_of_birth: bind("holderDob").value,
-            phone: bind("holderPhone").value,
-            address: bind("holderAddress").value,
-            ssn_last_four: bind("holderSsn").value,
-          };
-          const data = await api("/api/v1/account-holders/", {
-            method: "POST",
-            body: JSON.stringify(payload),
-          });
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("getHolderBtn").addEventListener("click", async () => {
-        const output = bind("holderOutput");
-        try {
-          requireAuth();
           const data = await api("/api/v1/account-holders/me");
-          show(output, data);
+          populateProfile(data);
+          statusEl.textContent = "";
         } catch (err) {
-          show(output, err);
+          statusEl.textContent = "No profile found yet.";
         }
-      });
-
-      bind("createAccountBtn").addEventListener("click", async () => {
-        const output = bind("accountsOutput");
-        try {
-          requireAuth();
-          const payload = {
-            account_type: bind("accountType").value,
-            currency: bind("accountCurrency").value || "USD",
-          };
-          const depositValue = bind("initialDeposit").value;
-          if (depositValue) {
-            payload.initial_deposit_cents = Number(depositValue);
-          }
-          const data = await api("/api/v1/accounts/", {
-            method: "POST",
-            body: JSON.stringify(payload),
-          });
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("listAccountsBtn").addEventListener("click", async () => {
-        const output = bind("accountsOutput");
-        try {
-          requireAuth();
-          const data = await api("/api/v1/accounts/");
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("getAccountBtn").addEventListener("click", async () => {
-        const output = bind("accountsOutput");
-        try {
-          requireAuth();
-          const id = bind("accountId").value;
-          const data = await api(`/api/v1/accounts/${id}`);
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("depositBtn").addEventListener("click", async () => {
-        const output = bind("accountsOutput");
-        try {
-          requireAuth();
-          const id = bind("accountId").value;
-          const data = await api(`/api/v1/accounts/${id}/deposit`, {
-            method: "POST",
-            body: JSON.stringify({
-              amount_cents: Number(bind("depositAmount").value),
-              description: bind("depositDesc").value || null,
-            }),
-          });
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("listTxBtn").addEventListener("click", async () => {
-        const output = bind("accountsOutput");
-        try {
-          requireAuth();
-          const id = bind("accountId").value;
-          const page = bind("txPage").value || 1;
-          const pageSize = bind("txPageSize").value || 20;
-          const txType = bind("txType").value;
-          const params = new URLSearchParams({ page, page_size: pageSize });
-          if (txType) params.set("transaction_type", txType);
-          const data = await api(`/api/v1/accounts/${id}/transactions?${params.toString()}`);
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("transferBtn").addEventListener("click", async () => {
-        const output = bind("transferOutput");
-        try {
-          requireAuth();
-          const data = await api("/api/v1/transfers/", {
-            method: "POST",
-            body: JSON.stringify({
-              idempotency_key: bind("transferKey").value,
-              from_account_id: bind("transferFrom").value,
-              to_account_id: bind("transferTo").value,
-              amount_cents: Number(bind("transferAmount").value),
-              description: bind("transferDesc").value || null,
-            }),
-          });
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("createCardBtn").addEventListener("click", async () => {
-        const output = bind("cardsOutput");
-        try {
-          requireAuth();
-          const data = await api("/api/v1/cards/", {
-            method: "POST",
-            body: JSON.stringify({
-              account_id: bind("cardAccountId").value,
-              card_number: bind("cardNumber").value,
-              card_type: bind("cardType").value,
-              expiry_month: Number(bind("cardExpiryMonth").value),
-              expiry_year: Number(bind("cardExpiryYear").value),
-              daily_limit: Number(bind("cardDailyLimit").value),
-            }),
-          });
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("listCardsBtn").addEventListener("click", async () => {
-        const output = bind("cardsOutput");
-        try {
-          requireAuth();
-          const data = await api("/api/v1/cards/");
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      bind("freezeCardBtn").addEventListener("click", async () => {
-        const output = bind("cardsOutput");
-        try {
-          requireAuth();
-          const id = bind("cardId").value;
-          const data = await api(`/api/v1/cards/${id}/status`, {
-            method: "PATCH",
-            body: JSON.stringify({ status: "frozen" }),
-          });
-          show(output, data);
-        } catch (err) {
-          show(output, err);
-        }
-      });
-
-      loadFormState();
+      })();
     </script>
   </body>
 </html>

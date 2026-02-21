@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accounts</title>
+    <style>
+      :root {
+        --bg: #0c1117;
+        --panel: #121a24;
+        --panel-2: #1a2430;
+        --ink: #f7f3eb;
+        --muted: #9aa6b2;
+        --accent: #f6c453;
+        --accent-2: #4dd7bf;
+        --stroke: rgba(255, 255, 255, 0.08);
+        --radius: 16px;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, #1c2531, var(--bg));
+        min-height: 100vh;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 36px 6vw 20px;
+        align-items: center;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 0 6vw 10px;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(28px, 4vw, 46px);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        max-width: 520px;
+      }
+
+      main {
+        display: block;
+        padding: 20px 6vw 50px;
+      }
+
+      section {
+        background: rgba(18, 26, 36, 0.92);
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      section h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .tab-desc {
+        margin: -6px 0 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .accounts-section-title {
+        margin: 16px 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent-2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      input,
+      select,
+      button,
+      a {
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      input,
+      select {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: var(--panel-2);
+        color: var(--ink);
+      }
+
+      button,
+      .nav-link {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(120deg, var(--accent), #ff9f45);
+        color: #1a1405;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button.ghost,
+      .nav-link.ghost {
+        background: transparent;
+        border: 1px solid var(--stroke);
+        color: var(--ink);
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .output {
+        min-height: 90px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(5, 8, 12, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+
+      @media (max-width: 900px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Accounts</h1>
+        <p class="subtitle">Open accounts, deposit funds, and view transactions.</p>
+      </div>
+      <div class="header-actions">
+        <button id="logoutBtn" class="ghost">Logout</button>
+      </div>
+    </header>
+
+    <nav class="nav-links">
+      <a class="nav-link ghost" href="/app">Dashboard</a>
+      <a class="nav-link" href="/accounts">Accounts</a>
+      <a class="nav-link ghost" href="/transfers">Transfers</a>
+      <a class="nav-link ghost" href="/cards">Cards</a>
+    </nav>
+
+    <main>
+      <section>
+        <h2>Accounts</h2>
+        <p class="tab-desc">Choose an account, then deposit or view transactions.</p>
+        <div class="stack">
+          <div class="row" id="accountCreateRow">
+            <select id="accountType">
+              <option value="">select account type</option>
+              <option value="checking">checking</option>
+              <option value="savings">savings</option>
+            </select>
+            <input id="accountCurrency" placeholder="currency" value="USD" />
+            <input id="initialDeposit" placeholder="initial_deposit_cents" />
+            <button id="createAccountBtn">Open Account</button>
+          </div>
+          <h3 class="accounts-section-title" id="currentAccountsTitle" style="display: none;">Current Accounts</h3>
+          <div id="accountsList" class="output"></div>
+          <div id="accountManageRows" style="display: none;">
+            <div class="row">
+              <input id="depositAmount" placeholder="deposit_amount_cents" />
+              <input id="depositDesc" placeholder="description" />
+              <button id="depositBtn">Deposit</button>
+            </div>
+            <div class="row">
+              <button id="listTxBtn" class="ghost">Transactions</button>
+            </div>
+            <div id="transactionsList" class="output"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const defaultBaseUrl = window.location.origin;
+      const state = {
+        accessToken: localStorage.getItem("accessToken") || "",
+        refreshToken: localStorage.getItem("refreshToken") || "",
+      };
+      const sessionAuthed = sessionStorage.getItem("sessionAuthed") === "true";
+      if (!sessionAuthed || !state.accessToken) {
+        window.location.href = "/";
+      }
+      let selectedAccountId = "";
+
+      function apiUrl(path) {
+        return `${defaultBaseUrl}${path}`;
+      }
+
+      function bind(id) {
+        return document.getElementById(id);
+      }
+
+      function setTokens(tokens) {
+        state.accessToken = tokens.access_token || "";
+        state.refreshToken = tokens.refresh_token || "";
+        localStorage.setItem("accessToken", state.accessToken);
+        localStorage.setItem("refreshToken", state.refreshToken);
+        if (state.accessToken) {
+          sessionStorage.setItem("sessionAuthed", "true");
+        }
+      }
+
+      async function api(path, options = {}) {
+        const headers = options.headers || {};
+        if (state.accessToken) {
+          headers.Authorization = `Bearer ${state.accessToken}`;
+        }
+        const url = apiUrl(path);
+        const res = await fetch(url, {
+          ...options,
+          headers: { "Content-Type": "application/json", ...headers },
+        });
+        const text = await res.text();
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (err) {
+          data = { raw: text };
+        }
+        if (!res.ok) {
+          throw { status: res.status, data };
+        }
+        return data;
+      }
+
+      function setAccountsVisible(hasAccounts) {
+        const manageRows = bind("accountManageRows");
+        if (manageRows) {
+          manageRows.style.display = hasAccounts && selectedAccountId ? "block" : "none";
+        }
+        if (!selectedAccountId) {
+          renderTransactionsList([]);
+        }
+      }
+
+      function clearInputs(ids) {
+        ids.forEach((id) => {
+          const el = bind(id);
+          if (el) {
+            el.value = "";
+          }
+        });
+      }
+
+      function renderAccountsList(accounts) {
+        const list = bind("accountsList");
+        const title = bind("currentAccountsTitle");
+        if (!list) {
+          return;
+        }
+        if (!accounts.length) {
+          list.textContent = "No accounts yet. Use Open Account to create one.";
+          if (title) title.style.display = "none";
+          return;
+        }
+        if (title) title.style.display = "block";
+        list.innerHTML = accounts
+          .map((account) => {
+            const isSelected = account.id === selectedAccountId;
+            const label = `${account.account_number} (${account.account_type}) - ${account.balance_cents} ${account.currency}`;
+            return `<div><button class="ghost" data-account="${account.id}">${isSelected ? "✓ " : ""}${label}</button></div>`;
+          })
+          .join("");
+        list.querySelectorAll("button[data-account]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            selectedAccountId = btn.dataset.account || "";
+            renderTransactionsList([]);
+            setAccountsVisible(true);
+            renderAccountsList(accounts);
+          });
+        });
+      }
+
+      function renderTransactionsList(payload) {
+        const list = bind("transactionsList");
+        if (!list) {
+          return;
+        }
+        const transactions = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.items)
+          ? payload.items
+          : [];
+        if (!transactions.length) {
+          list.textContent = "No transactions found.";
+          return;
+        }
+        list.innerHTML = transactions
+          .map((tx) => {
+            const date = tx.created_at ? new Date(tx.created_at).toLocaleString() : "";
+            const desc = tx.description || "";
+            const amount = Number.isFinite(tx.amount_cents)
+              ? `${tx.amount_cents} ${tx.currency || ""}`.trim()
+              : "";
+            return `<div>${date} - ${desc} - ${amount}</div>`;
+          })
+          .join("");
+      }
+
+      async function refreshAccounts() {
+        const accounts = await api("/api/v1/accounts/");
+        renderAccountsList(accounts);
+        if (selectedAccountId) {
+          const stillExists = accounts.some((account) => account.id === selectedAccountId);
+          if (!stillExists) {
+            selectedAccountId = "";
+          }
+        }
+        setAccountsVisible(accounts.length > 0);
+        renderAccountsList(accounts);
+        return accounts;
+      }
+
+      bind("logoutBtn").addEventListener("click", () => {
+        setTokens({});
+        sessionStorage.removeItem("sessionAuthed");
+        sessionStorage.removeItem("userId");
+        window.location.href = "/";
+      });
+
+      bind("createAccountBtn").addEventListener("click", async () => {
+        try {
+          const payload = {
+            account_type: bind("accountType").value,
+            currency: bind("accountCurrency").value || "USD",
+          };
+          const depositValue = bind("initialDeposit").value;
+          if (depositValue) {
+            payload.initial_deposit_cents = Number(depositValue);
+          }
+          await api("/api/v1/accounts/", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          clearInputs(["accountType", "accountCurrency", "initialDeposit"]);
+          bind("accountCurrency").value = "USD";
+          selectedAccountId = "";
+          setAccountsVisible(true);
+          await refreshAccounts();
+        } catch (err) {
+          renderTransactionsList([]);
+        }
+      });
+
+      bind("depositBtn").addEventListener("click", async () => {
+        try {
+          if (!selectedAccountId) {
+            renderTransactionsList([]);
+            return;
+          }
+          await api(`/api/v1/accounts/${selectedAccountId}/deposit`, {
+            method: "POST",
+            body: JSON.stringify({
+              amount_cents: Number(bind("depositAmount").value),
+              description: bind("depositDesc").value || null,
+            }),
+          });
+          clearInputs(["depositAmount", "depositDesc"]);
+          await refreshAccounts();
+        } catch (err) {
+          renderTransactionsList([]);
+        }
+      });
+
+      bind("listTxBtn").addEventListener("click", async () => {
+        try {
+          if (!selectedAccountId) {
+            renderTransactionsList([]);
+            return;
+          }
+          const data = await api(`/api/v1/accounts/${selectedAccountId}/transactions`);
+          renderTransactionsList(data);
+        } catch (err) {
+          renderTransactionsList([]);
+        }
+      });
+
+      (async () => {
+        try {
+          await refreshAccounts();
+        } catch (err) {
+          return;
+        }
+      })();
+    </script>
+  </body>
+</html>
