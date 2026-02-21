@@ -32,25 +32,24 @@ def transfer_funds(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Destination account not found",
         )
-    with db.begin():
-        transfer = create_transfer(
-            db,
-            from_account,
-            to_account,
-            idempotency_key=payload.idempotency_key,
-            amount_cents=payload.amount_cents,
-            description=payload.description,
-        )
+    transfer = create_transfer(
+        db,
+        from_account,
+        to_account,
+        idempotency_key=payload.idempotency_key,
+        amount_cents=payload.amount_cents,
+        description=payload.description,
+    )
 
-        log_action(
-            db,
-            user_id=current_user.id,
-            action="transfer",
-            resource_type="transfer",
-            resource_id=transfer.id,
-            details=f"from={from_account.id} to={to_account.id}",
-            ip_address=request.client.host if request.client else None,
-        )
-
+    log_action(
+        db,
+        user_id=current_user.id,
+        action="transfer",
+        resource_type="transfer",
+        resource_id=transfer.id,
+        details=f"from={from_account.id} to={to_account.id}",
+        ip_address=request.client.host if request.client else None,
+    )
+    db.commit()
     db.refresh(transfer)
     return transfer

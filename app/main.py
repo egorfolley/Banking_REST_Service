@@ -21,13 +21,17 @@ def create_app() -> FastAPI:
     )
     app.include_router(api_router, prefix="/api/v1")
 
-    ui_dir = Path(__file__).resolve().parents[1] / "ui"
-    if ui_dir.exists():
-        app.mount("/ui", StaticFiles(directory=ui_dir), name="ui")
+    frontend_dir = Path(__file__).resolve().parents[1] / "frontend"
+    if frontend_dir.exists():
+        app.mount("/frontend", StaticFiles(directory=frontend_dir), name="frontend")
 
         @app.get("/")
         def root():
-            return FileResponse(ui_dir / "index.html")
+            return FileResponse(frontend_dir / "index.html")
+
+        @app.get("/app")
+        def app_page():
+            return FileResponse(frontend_dir / "app.html")
 
     @app.on_event("startup")
     def _startup() -> None:

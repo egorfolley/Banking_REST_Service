@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Banking Client</title>
+    <style>
+      :root {
+        --bg: #0c1117;
+        --panel: #121a24;
+        --panel-2: #1a2430;
+        --ink: #f7f3eb;
+        --muted: #9aa6b2;
+        --accent: #f6c453;
+        --stroke: rgba(255, 255, 255, 0.08);
+        --radius: 16px;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, #1c2531, var(--bg));
+        min-height: 100vh;
+      }
+
+      header {
+        padding: 36px 6vw 10px;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(32px, 4vw, 52px);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        max-width: 520px;
+      }
+
+      section {
+        margin: 10px 6vw 40px;
+        background: rgba(18, 26, 36, 0.92);
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .tab-desc {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      input,
+      select,
+      button {
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      input,
+      select {
+        flex: 1;
+        min-width: 150px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: var(--panel-2);
+        color: var(--ink);
+      }
+
+      button {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(120deg, var(--accent), #ff9f45);
+        color: #1a1405;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .output {
+        margin-top: 12px;
+        min-height: 90px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(5, 8, 12, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Banking Client</h1>
+      <p class="subtitle">Sign up or log in to access your banking dashboard.</p>
+    </header>
+
+    <section>
+      <h2>Auth</h2>
+      <p class="tab-desc">Choose an action, enter credentials, and continue.</p>
+      <div class="row">
+        <select id="authMode">
+          <option value="signup">Sign up</option>
+          <option value="login">Log in</option>
+        </select>
+        <input id="authEmail" placeholder="email" />
+        <input id="authPassword" placeholder="password" type="password" />
+        <button id="authSubmitBtn">Continue</button>
+      </div>
+      <pre id="authOutput" class="output"></pre>
+    </section>
+
+    <script>
+      const defaultBaseUrl = window.location.origin;
+      const state = {
+        accessToken: localStorage.getItem("accessToken") || "",
+        refreshToken: localStorage.getItem("refreshToken") || "",
+      };
+      const sessionAuthed = sessionStorage.getItem("sessionAuthed") === "true";
+      if (sessionAuthed && state.accessToken) {
+        window.location.href = "/app";
+      }
+
+      function apiUrl(path) {
+        return `${defaultBaseUrl}${path}`;
+      }
+
+      function show(el, payload) {
+        el.textContent = JSON.stringify(payload, null, 2);
+      }
+
+      function bind(id) {
+        return document.getElementById(id);
+      }
+
+      function setTokens(tokens) {
+        state.accessToken = tokens.access_token || "";
+        state.refreshToken = tokens.refresh_token || "";
+        localStorage.setItem("accessToken", state.accessToken);
+        localStorage.setItem("refreshToken", state.refreshToken);
+        if (state.accessToken) {
+          sessionStorage.setItem("sessionAuthed", "true");
+        }
+      }
+
+      async function api(path, options = {}) {
+        const headers = options.headers || {};
+        const url = apiUrl(path);
+        const res = await fetch(url, {
+          ...options,
+          headers: { "Content-Type": "application/json", ...headers },
+        });
+        const text = await res.text();
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (err) {
+          data = { raw: text };
+        }
+        if (!res.ok) {
+          throw { status: res.status, data };
+        }
+        return data;
+      }
+
+      bind("authSubmitBtn").addEventListener("click", async () => {
+        const output = bind("authOutput");
+        try {
+          const mode = bind("authMode").value;
+          const email = bind("authEmail").value;
+          const password = bind("authPassword").value;
+          const endpoint = mode === "signup" ? "/api/v1/auth/signup" : "/api/v1/auth/login";
+          const data = await api(endpoint, {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+          });
+          setTokens(data);
+          show(output, data);
+          window.location.href = "/app";
+        } catch (err) {
+          show(output, err);
+        }
+      });
+    </script>
+  </body>
+</html>

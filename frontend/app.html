@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Banking Dashboard</title>
+    <style>
+      :root {
+        --bg: #0c1117;
+        --panel: #121a24;
+        --panel-2: #1a2430;
+        --ink: #f7f3eb;
+        --muted: #9aa6b2;
+        --accent: #f6c453;
+        --accent-2: #4dd7bf;
+        --danger: #ef6b6b;
+        --stroke: rgba(255, 255, 255, 0.08);
+        --radius: 16px;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, #1c2531, var(--bg));
+        min-height: 100vh;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 36px 6vw 20px;
+        align-items: center;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 0 6vw 10px;
+      }
+
+      .tab-btn {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--stroke);
+        background: rgba(18, 26, 36, 0.9);
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .tab-btn.active {
+        background: linear-gradient(120deg, var(--accent), #ff9f45);
+        color: #1a1405;
+        border-color: transparent;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(32px, 4vw, 52px);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        max-width: 440px;
+      }
+
+      main {
+        display: block;
+        padding: 20px 6vw 50px;
+      }
+
+      section {
+        background: rgba(18, 26, 36, 0.92);
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      section h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .tab-desc {
+        margin: -6px 0 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      input,
+      select,
+      button,
+      textarea {
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: var(--panel-2);
+        color: var(--ink);
+      }
+
+      button {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(120deg, var(--accent), #ff9f45);
+        color: #1a1405;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button.ghost {
+        background: transparent;
+        border: 1px solid var(--stroke);
+        color: var(--ink);
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .output {
+        min-height: 90px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(5, 8, 12, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
+      @media (max-width: 900px) {
+        header {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Banking Dashboard</h1>
+        <p class="subtitle">Manage your profile, accounts, transfers, and cards.</p>
+      </div>
+      <div class="header-actions">
+        <button id="logoutBtn" class="ghost">Logout</button>
+      </div>
+    </header>
+
+    <nav class="tabs" id="appTabs">
+      <button class="tab-btn active" data-tab="profile">Profile</button>
+      <button class="tab-btn" data-tab="accounts">Accounts</button>
+      <button class="tab-btn" data-tab="transfers">Transfers</button>
+      <button class="tab-btn" data-tab="cards">Cards</button>
+    </nav>
+
+    <main>
+      <section class="tab-panel active" data-panel="profile">
+        <h2>Profile</h2>
+        <p class="tab-desc">Create your account holder profile before opening accounts.</p>
+        <div class="stack">
+          <div class="row">
+            <input id="holderFirst" placeholder="first_name" />
+            <input id="holderLast" placeholder="last_name" />
+          </div>
+          <div class="row">
+            <input id="holderDob" placeholder="YYYY-MM-DD" />
+            <input id="holderPhone" placeholder="phone" />
+          </div>
+          <div class="row">
+            <input id="holderAddress" placeholder="address" />
+            <input id="holderSsn" placeholder="ssn_last_four" />
+          </div>
+          <div class="row">
+            <button id="createHolderBtn">Create</button>
+            <button id="getHolderBtn" class="ghost">Get</button>
+          </div>
+          <pre id="holderOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="accounts">
+        <h2>Accounts</h2>
+        <p class="tab-desc">Open accounts, deposit funds, and view transactions.</p>
+        <div class="stack">
+          <div class="row">
+            <select id="accountType">
+              <option value="checking">checking</option>
+              <option value="savings">savings</option>
+            </select>
+            <input id="accountCurrency" placeholder="currency" value="USD" />
+            <input id="initialDeposit" placeholder="initial_deposit_cents" />
+            <button id="createAccountBtn">Open Account</button>
+          </div>
+          <div class="row">
+            <input id="accountId" placeholder="account_id" />
+            <button id="getAccountBtn" class="ghost">Get</button>
+            <button id="listAccountsBtn" class="ghost">List</button>
+          </div>
+          <div class="row">
+            <input id="depositAmount" placeholder="deposit_amount_cents" />
+            <input id="depositDesc" placeholder="description" />
+            <button id="depositBtn">Deposit</button>
+          </div>
+          <div class="row">
+            <input id="txPage" placeholder="page" value="1" />
+            <input id="txPageSize" placeholder="page_size" value="20" />
+            <input id="txType" placeholder="transaction_type" />
+            <button id="listTxBtn" class="ghost">Transactions</button>
+          </div>
+          <pre id="accountsOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="transfers">
+        <h2>Transfers</h2>
+        <p class="tab-desc">Move money between accounts with idempotent transfers.</p>
+        <div class="stack">
+          <div class="row">
+            <input id="transferKey" placeholder="idempotency_key" />
+            <input id="transferFrom" placeholder="from_account_id" />
+          </div>
+          <div class="row">
+            <input id="transferTo" placeholder="to_account_id" />
+            <input id="transferAmount" placeholder="amount_cents" />
+          </div>
+          <div class="row">
+            <input id="transferDesc" placeholder="description" />
+            <button id="transferBtn">Send Transfer</button>
+          </div>
+          <pre id="transferOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="cards">
+        <h2>Cards</h2>
+        <p class="tab-desc">Issue cards for accounts and freeze when needed.</p>
+        <div class="stack">
+          <div class="row">
+            <input id="cardAccountId" placeholder="account_id" />
+            <input id="cardNumber" placeholder="card_number" />
+          </div>
+          <div class="row">
+            <select id="cardType">
+              <option value="debit">debit</option>
+              <option value="credit">credit</option>
+            </select>
+            <input id="cardExpiryMonth" placeholder="expiry_month" />
+            <input id="cardExpiryYear" placeholder="expiry_year" />
+            <input id="cardDailyLimit" placeholder="daily_limit" />
+            <button id="createCardBtn">Issue Card</button>
+          </div>
+          <div class="row">
+            <input id="cardId" placeholder="card_id" />
+            <button id="freezeCardBtn" class="ghost">Freeze</button>
+            <button id="listCardsBtn" class="ghost">List</button>
+          </div>
+          <pre id="cardsOutput" class="output"></pre>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const defaultBaseUrl = window.location.origin;
+      const state = {
+        accessToken: localStorage.getItem("accessToken") || "",
+        refreshToken: localStorage.getItem("refreshToken") || "",
+      };
+      const sessionAuthed = sessionStorage.getItem("sessionAuthed") === "true";
+      if (!sessionAuthed || !state.accessToken) {
+        window.location.href = "/";
+      }
+
+      function apiUrl(path) {
+        return `${defaultBaseUrl}${path}`;
+      }
+
+      function show(el, payload) {
+        el.textContent = JSON.stringify(payload, null, 2);
+      }
+
+      function bind(id) {
+        return document.getElementById(id);
+      }
+
+      function setActiveTab(tabName) {
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.tab === tabName);
+        });
+        document.querySelectorAll(".tab-panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.panel === tabName);
+        });
+      }
+
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setActiveTab(btn.dataset.tab);
+        });
+      });
+
+      function requireAuth() {
+        if (!state.accessToken) {
+          window.location.href = "/";
+          throw new Error("Sign in required");
+        }
+      }
+
+      function setTokens(tokens) {
+        state.accessToken = tokens.access_token || "";
+        state.refreshToken = tokens.refresh_token || "";
+        localStorage.setItem("accessToken", state.accessToken);
+        localStorage.setItem("refreshToken", state.refreshToken);
+        if (state.accessToken) {
+          sessionStorage.setItem("sessionAuthed", "true");
+        }
+      }
+
+      async function api(path, options = {}) {
+        const headers = options.headers || {};
+        if (state.accessToken) {
+          headers.Authorization = `Bearer ${state.accessToken}`;
+        }
+        const url = apiUrl(path);
+        const res = await fetch(url, {
+          ...options,
+          headers: { "Content-Type": "application/json", ...headers },
+        });
+        const text = await res.text();
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (err) {
+          data = { raw: text };
+        }
+        if (!res.ok) {
+          throw { status: res.status, data };
+        }
+        return data;
+      }
+
+      function loadFormState() {
+        const ids = [
+          "holderFirst",
+          "holderLast",
+          "holderDob",
+          "holderPhone",
+          "holderAddress",
+          "holderSsn",
+          "accountType",
+          "accountCurrency",
+          "initialDeposit",
+          "accountId",
+          "depositAmount",
+          "depositDesc",
+          "txPage",
+          "txPageSize",
+          "txType",
+          "transferKey",
+          "transferFrom",
+          "transferTo",
+          "transferAmount",
+          "transferDesc",
+          "cardAccountId",
+          "cardNumber",
+          "cardType",
+          "cardExpiryMonth",
+          "cardExpiryYear",
+          "cardDailyLimit",
+          "cardId",
+        ];
+        ids.forEach((id) => {
+          const el = bind(id);
+          if (!el) {
+            return;
+          }
+          const stored = localStorage.getItem(`ui_${id}`);
+          if (stored !== null) {
+            el.value = stored;
+          }
+        });
+      }
+
+      function saveFormState() {
+        const ids = [
+          "holderFirst",
+          "holderLast",
+          "holderDob",
+          "holderPhone",
+          "holderAddress",
+          "holderSsn",
+          "accountType",
+          "accountCurrency",
+          "initialDeposit",
+          "accountId",
+          "depositAmount",
+          "depositDesc",
+          "txPage",
+          "txPageSize",
+          "txType",
+          "transferKey",
+          "transferFrom",
+          "transferTo",
+          "transferAmount",
+          "transferDesc",
+          "cardAccountId",
+          "cardNumber",
+          "cardType",
+          "cardExpiryMonth",
+          "cardExpiryYear",
+          "cardDailyLimit",
+          "cardId",
+        ];
+        ids.forEach((id) => {
+          const el = bind(id);
+          if (!el) {
+            return;
+          }
+          localStorage.setItem(`ui_${id}`, el.value || "");
+        });
+      }
+
+      [
+        "holderFirst",
+        "holderLast",
+        "holderDob",
+        "holderPhone",
+        "holderAddress",
+        "holderSsn",
+        "accountType",
+        "accountCurrency",
+        "initialDeposit",
+        "accountId",
+        "depositAmount",
+        "depositDesc",
+        "txPage",
+        "txPageSize",
+        "txType",
+        "transferKey",
+        "transferFrom",
+        "transferTo",
+        "transferAmount",
+        "transferDesc",
+        "cardAccountId",
+        "cardNumber",
+        "cardType",
+        "cardExpiryMonth",
+        "cardExpiryYear",
+        "cardDailyLimit",
+        "cardId",
+      ].forEach((id) => {
+        const el = bind(id);
+        if (!el) {
+          return;
+        }
+        el.addEventListener("input", saveFormState);
+        el.addEventListener("change", saveFormState);
+      });
+
+      bind("logoutBtn").addEventListener("click", () => {
+        setTokens({});
+        sessionStorage.removeItem("sessionAuthed");
+        window.location.href = "/";
+      });
+
+      bind("createHolderBtn").addEventListener("click", async () => {
+        const output = bind("holderOutput");
+        try {
+          requireAuth();
+          const payload = {
+            first_name: bind("holderFirst").value,
+            last_name: bind("holderLast").value,
+            date_of_birth: bind("holderDob").value,
+            phone: bind("holderPhone").value,
+            address: bind("holderAddress").value,
+            ssn_last_four: bind("holderSsn").value,
+          };
+          const data = await api("/api/v1/account-holders/", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("getHolderBtn").addEventListener("click", async () => {
+        const output = bind("holderOutput");
+        try {
+          requireAuth();
+          const data = await api("/api/v1/account-holders/me");
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("createAccountBtn").addEventListener("click", async () => {
+        const output = bind("accountsOutput");
+        try {
+          requireAuth();
+          const payload = {
+            account_type: bind("accountType").value,
+            currency: bind("accountCurrency").value || "USD",
+          };
+          const depositValue = bind("initialDeposit").value;
+          if (depositValue) {
+            payload.initial_deposit_cents = Number(depositValue);
+          }
+          const data = await api("/api/v1/accounts/", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("listAccountsBtn").addEventListener("click", async () => {
+        const output = bind("accountsOutput");
+        try {
+          requireAuth();
+          const data = await api("/api/v1/accounts/");
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("getAccountBtn").addEventListener("click", async () => {
+        const output = bind("accountsOutput");
+        try {
+          requireAuth();
+          const id = bind("accountId").value;
+          const data = await api(`/api/v1/accounts/${id}`);
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("depositBtn").addEventListener("click", async () => {
+        const output = bind("accountsOutput");
+        try {
+          requireAuth();
+          const id = bind("accountId").value;
+          const data = await api(`/api/v1/accounts/${id}/deposit`, {
+            method: "POST",
+            body: JSON.stringify({
+              amount_cents: Number(bind("depositAmount").value),
+              description: bind("depositDesc").value || null,
+            }),
+          });
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("listTxBtn").addEventListener("click", async () => {
+        const output = bind("accountsOutput");
+        try {
+          requireAuth();
+          const id = bind("accountId").value;
+          const page = bind("txPage").value || 1;
+          const pageSize = bind("txPageSize").value || 20;
+          const txType = bind("txType").value;
+          const params = new URLSearchParams({ page, page_size: pageSize });
+          if (txType) params.set("transaction_type", txType);
+          const data = await api(`/api/v1/accounts/${id}/transactions?${params.toString()}`);
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("transferBtn").addEventListener("click", async () => {
+        const output = bind("transferOutput");
+        try {
+          requireAuth();
+          const data = await api("/api/v1/transfers/", {
+            method: "POST",
+            body: JSON.stringify({
+              idempotency_key: bind("transferKey").value,
+              from_account_id: bind("transferFrom").value,
+              to_account_id: bind("transferTo").value,
+              amount_cents: Number(bind("transferAmount").value),
+              description: bind("transferDesc").value || null,
+            }),
+          });
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("createCardBtn").addEventListener("click", async () => {
+        const output = bind("cardsOutput");
+        try {
+          requireAuth();
+          const data = await api("/api/v1/cards/", {
+            method: "POST",
+            body: JSON.stringify({
+              account_id: bind("cardAccountId").value,
+              card_number: bind("cardNumber").value,
+              card_type: bind("cardType").value,
+              expiry_month: Number(bind("cardExpiryMonth").value),
+              expiry_year: Number(bind("cardExpiryYear").value),
+              daily_limit: Number(bind("cardDailyLimit").value),
+            }),
+          });
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("listCardsBtn").addEventListener("click", async () => {
+        const output = bind("cardsOutput");
+        try {
+          requireAuth();
+          const data = await api("/api/v1/cards/");
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      bind("freezeCardBtn").addEventListener("click", async () => {
+        const output = bind("cardsOutput");
+        try {
+          requireAuth();
+          const id = bind("cardId").value;
+          const data = await api(`/api/v1/cards/${id}/status`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: "frozen" }),
+          });
+          show(output, data);
+        } catch (err) {
+          show(output, err);
+        }
+      });
+
+      loadFormState();
+    </script>
+  </body>
+</html>
