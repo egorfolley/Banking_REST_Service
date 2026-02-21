@@ -149,6 +149,26 @@
         white-space: pre-wrap;
       }
 
+      .success-message {
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(77, 215, 191, 0.1);
+        border: 1px solid var(--accent-2);
+        color: var(--accent-2);
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+
+      .error-message {
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid #ff6b6b;
+        color: #ff6b6b;
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+
       @media (max-width: 900px) {
         header {
           flex-direction: column;
@@ -203,7 +223,8 @@
               <button id="transferBtn">Send Transfer</button>
             </div>
           </div>
-          <pre id="transferOutput" class="output"></pre>
+          <div id="transferMessage"></div>
+          <pre id="transferOutput" class="output" style="display: none;"></pre>
         </div>
       </section>
     </main>
@@ -373,17 +394,21 @@
 
       bind("transferBtn").addEventListener("click", async () => {
         const output = bind("transferOutput");
+        const messageEl = bind("transferMessage");
+        messageEl.innerHTML = "";
+        output.style.display = "none";
+        
         try {
           const fromAccountId = bind("transferFrom").value;
           const isAllowed = availableAccounts.some((account) => account.id === fromAccountId);
           if (!fromAccountId || !isAllowed) {
-            show(output, { error: "Select one of your accounts first." });
+            messageEl.innerHTML = '<div class="error-message">Unable to complete transfer: Select one of your accounts first.</div>';
             return;
           }
           
           let toAccountId = bind("transferTo").value.trim();
           if (!toAccountId) {
-            show(output, { error: "Enter a destination account UUID or account number." });
+            messageEl.innerHTML = '<div class="error-message">Unable to complete transfer: Enter a destination account UUID or account number.</div>';
             return;
           }
           
@@ -393,7 +418,7 @@
             // Assume it's an account number, resolve to UUID
             const account = allAccounts.find((acc) => acc.account_number === toAccountId);
             if (!account) {
-              show(output, { error: `Account "${toAccountId}" not found.` });
+              messageEl.innerHTML = `<div class="error-message">Unable to complete transfer: Account "${toAccountId}" not found.</div>`;
               return;
             }
             toAccountId = account.id;
@@ -402,13 +427,13 @@
           // Verify destination account exists
           const destExists = allAccounts.some((acc) => acc.id === toAccountId);
           if (!destExists) {
-            show(output, { error: "Destination account not found." });
+            messageEl.innerHTML = '<div class="error-message">Unable to complete transfer: Destination account not found.</div>';
             return;
           }
           
           // Prevent self-transfer
           if (fromAccountId === toAccountId) {
-            show(output, { error: "Cannot transfer to the same account." });
+            messageEl.innerHTML = '<div class="error-message">Unable to complete transfer: Cannot transfer to the same account.</div>';
             return;
           }
           
@@ -421,6 +446,9 @@
               description: bind("transferDesc").value || null,
             }),
           });
+          
+          // Success - show message and clear form
+          messageEl.innerHTML = '<div class="success-message">✓ Transfer completed successfully!</div>';
           clearInputs([
             "transferFrom",
             "transferTo",
@@ -431,9 +459,9 @@
           bind("transferTo").value = "";
           bind("accountDetails").style.display = "none";
           bind("transferFields").style.display = "none";
-          show(output, data);
         } catch (err) {
-          show(output, err);
+          const errorDetail = err.data?.detail || "An unexpected error occurred";
+          messageEl.innerHTML = `<div class="error-message">Unable to complete transfer: ${errorDetail}</div>`;
         }
       });
 

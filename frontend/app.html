@@ -140,6 +140,33 @@
         font-size: 13px;
       }
 
+      input:disabled {
+        opacity: 0.7;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .error {
+        color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.1);
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+
+      .success {
+        color: var(--accent-2);
+        background: rgba(77, 215, 191, 0.1);
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+
       @media (max-width: 900px) {
         header {
           flex-direction: column;
@@ -163,20 +190,24 @@
       <section>
         <h2>Profile</h2>
         <p class="tab-desc">Your account holder details.</p>
+        <div id="profileMessage" class="status"></div>
         <div class="stack">
           <div class="row">
-            <input id="holderFirst" placeholder="first_name" disabled />
-            <input id="holderLast" placeholder="last_name" disabled />
+            <input id="holderFirst" placeholder="first_name" />
+            <input id="holderLast" placeholder="last_name" />
           </div>
           <div class="row">
-            <input id="holderDob" placeholder="YYYY-MM-DD" disabled />
-            <input id="holderPhone" placeholder="phone" disabled />
+            <input id="holderDob" placeholder="YYYY-MM-DD" type="date" />
+            <input id="holderPhone" placeholder="phone" />
           </div>
           <div class="row">
-            <input id="holderAddress" placeholder="address" disabled />
-            <input id="holderSsn" placeholder="ssn_last_four" disabled />
+            <input id="holderAddress" placeholder="address" />
+            <input id="holderSsn" placeholder="ssn_last_four (4 digits)" maxlength="4" />
           </div>
-          <div id="profileStatus" class="status"></div>
+          <div class="row">
+            <button id="saveProfileBtn">Save Profile</button>
+            <div id="profileStatus" class="status"></div>
+          </div>
         </div>
       </section>
 
@@ -251,6 +282,99 @@
         bind("holderSsn").value = profile.ssn_last_four || "";
       }
 
+      function disableProfileForm() {
+        bind("holderFirst").disabled = true;
+        bind("holderLast").disabled = true;
+        bind("holderDob").disabled = true;
+        bind("holderPhone").disabled = true;
+        bind("holderAddress").disabled = true;
+        bind("holderSsn").disabled = true;
+        bind("saveProfileBtn").disabled = true;
+      }
+
+      function enableProfileForm() {
+        bind("holderFirst").disabled = false;
+        bind("holderLast").disabled = false;
+        bind("holderDob").disabled = false;
+        bind("holderPhone").disabled = false;
+        bind("holderAddress").disabled = false;
+        bind("holderSsn").disabled = false;
+        bind("saveProfileBtn").disabled = false;
+      }
+
+      function showProfileMessage(message, isError = false) {
+        const msgEl = bind("profileMessage");
+        msgEl.textContent = message;
+        msgEl.className = isError ? "error" : "success";
+      }
+
+      function hideProfileMessage() {
+        const msgEl = bind("profileMessage");
+        msgEl.textContent = "";
+        msgEl.className = "";
+      }
+
+      async function saveProfile() {
+        const first_name = bind("holderFirst").value.trim();
+        const last_name = bind("holderLast").value.trim();
+        const date_of_birth = bind("holderDob").value;
+        const phone = bind("holderPhone").value.trim();
+        const address = bind("holderAddress").value.trim();
+        const ssn_last_four = bind("holderSsn").value.trim();
+
+        // Validation
+        if (!first_name || !last_name || !date_of_birth || !phone || !address || !ssn_last_four) {
+          showProfileMessage("All fields are required", true);
+          return;
+        }
+
+        if (ssn_last_four.length !== 4 || !ssn_last_four.match(/^\d+$/)) {
+          showProfileMessage("SSN must be exactly 4 digits", true);
+          return;
+        }
+
+        const saveBtn = bind("saveProfileBtn");
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+
+        try {
+          const response = await api("/api/v1/account-holders/", {
+            method: "POST",
+            body: JSON.stringify({
+              first_name,
+              last_name,
+              date_of_birth,
+              phone,
+              address,
+              ssn_last_four,
+            }),
+          });
+
+          showProfileMessage("Profile created successfully!");
+          disableProfileForm();
+          bind("saveProfileBtn").textContent = "Profile Saved";
+        } catch (err) {
+          console.error("Profile save error:", err);
+          const errorMsg =
+            err.data?.detail || "Failed to save profile. Please try again.";
+          showProfileMessage(errorMsg, true);
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Save Profile";
+        }
+      }
+
+      function populateProfile(profile) {
+        if (!profile) {
+          return;
+        }
+        bind("holderFirst").value = profile.first_name || "";
+        bind("holderLast").value = profile.last_name || "";
+        bind("holderDob").value = profile.date_of_birth || "";
+        bind("holderPhone").value = profile.phone || "";
+        bind("holderAddress").value = profile.address || "";
+        bind("holderSsn").value = profile.ssn_last_four || "";
+      }
+
       bind("logoutBtn").addEventListener("click", () => {
         setTokens({});
         sessionStorage.removeItem("sessionAuthed");
@@ -258,14 +382,24 @@
         window.location.href = "/";
       });
 
+      bind("saveProfileBtn").addEventListener("click", saveProfile);
+
       (async () => {
         const statusEl = bind("profileStatus");
         try {
           const data = await api("/api/v1/account-holders/me");
+          // Profile exists - populate and disable form
           populateProfile(data);
-          statusEl.textContent = "";
+          disableProfileForm();
+          hideProfileMessage();
         } catch (err) {
-          statusEl.textContent = "No profile found yet.";
+          // No profile yet - enable form for new user
+          if (err.status === 404) {
+            enableProfileForm();
+            showProfileMessage("Please complete your profile to get started", false);
+          } else {
+            statusEl.textContent = "Error loading profile.";
+          }
         }
       })();
     </script>
