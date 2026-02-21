@@ -137,4 +137,4 @@ flowchart TD
 * [X] BP: Test client application for the flow + UI
 * [X] DocAI: Track progress of AI usage - report of tools, prompts, challenges solved with AI, manual interventions
 * [X] DocSecurity: Security considerations document
-* [ ] DocRoadmap: Roadmap document for future considerations
+* [X] DocRoadmap: Roadmap document for future considerations
