@@ -61,9 +61,44 @@ A RESTful banking API built with AI-driven development practices. This service p
 
 ![Architecture](assets/architecture.png)
 
-## Instructions
+## User Flow
 
-### UI Usage (Manual Flow)
+```mermaid
+flowchart TD
+    A([Unauthenticated User]) --> B{Have an account?}
+
+    B -- No --> C["POST /auth/signup<br/>email + password"]
+    B -- Yes --> D["POST /auth/login<br/>email + password"]
+
+    C --> E["Receive access_token<br/>+ refresh_token"]
+    D --> E
+
+    E --> F["POST /account-holders<br/>Create holder profile<br/>name, DOB, SSN-4, phone"]
+
+    F --> G["POST /accounts<br/>Open checking or savings<br/>optional initial_deposit_cents"]
+
+    G --> H{Choose action}
+
+    H --> I["POST /accounts/:id/deposit<br/>Deposit funds"]
+    H --> J["POST /accounts/:id/withdraw<br/>Withdraw funds"]
+    H --> K["POST /transfers<br/>Transfer between accounts<br/>idempotency_key required"]
+    H --> L["POST /cards<br/>Issue debit or credit card"]
+    H --> M["GET /statements/:id<br/>Date-range statement<br/>start= and end= params"]
+    H --> N["GET /accounts/:id/transactions<br/>Paginated transaction list"]
+
+    I --> O[("Account balance updated<br/>Transaction record created")]
+    J --> O
+    K --> P[("Both balances updated<br/>Two transaction records<br/>Deduped by idempotency key")]
+
+    L --> Q{Card action}
+    Q --> R["PATCH /cards/:id/status<br/>freeze / unfreeze / cancel"]
+    Q --> S["PATCH /cards/:id/limit<br/>Update daily limit"]
+
+    E --> T["POST /auth/refresh<br/>Rotate tokens before expiry"]
+    T --> E
+```
+
+## UI Usage (Manual Flow)
 
 1. **Start the API**
 
