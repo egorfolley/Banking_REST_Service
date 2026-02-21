@@ -1,8 +1,16 @@
 # Banking REST Service
 
-A production-grade banking API built with FastAPI. Covers user auth, account management, deposits/withdrawals, atomic transfers with idempotency, card management, and date-range statements — all backed by SQLite.
+A production-grade banking API built with Claude and Copilot. The project consists of:
 
-> Built using AI-assisted development. See [`docs/AI_log.md`](docs/AI_log.md) for the full AI usage report.
+* **Service core interface:** sign-up, accounts, transactions, etc
+* **DB** using SQLIte for simplicity
+* **Simple UI** for tests
+* Test coverage
+* Documentation
+
+Built using AI-assisted development. See [`docs/AI_log.md`](docs/AI_log.md) for the full AI usage report.
+
+> ### [Watch the walkthrough video](https://www.loom.com/share/78f4a0d027314f24ba7ffecadd31ff28)
 
 ---
 
@@ -353,4 +361,4 @@ The suite uses an isolated SQLite database per test — no external services req
 * [X] DocSecurity: Security considerations document
 * [X] DocRoadmap: Roadmap document
 * [X] Polish final repo before submitting
-* [ ] Make a Loom walkthrough video
+* [X] Make a Loom walkthrough video
