@@ -45,6 +45,10 @@ def create_app() -> FastAPI:
         def cards_page():
             return FileResponse(frontend_dir / "cards.html")
 
+        @app.get("/statements")
+        def statements_page():
+            return FileResponse(frontend_dir / "statements.html")
+
     @app.on_event("startup")
     def _startup() -> None:
         init_db()

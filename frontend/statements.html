@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Statements</title>
+    <style>
+      :root {
+        --bg: #0c1117;
+        --panel: #121a24;
+        --panel-2: #1a2430;
+        --ink: #f7f3eb;
+        --muted: #9aa6b2;
+        --accent: #f6c453;
+        --accent-2: #4dd7bf;
+        --stroke: rgba(255, 255, 255, 0.08);
+        --radius: 16px;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, #1c2531, var(--bg));
+        min-height: 100vh;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 36px 6vw 20px;
+        align-items: center;
+      }
+
+      .header-actions { display: flex; align-items: center; gap: 12px; }
+
+      .nav-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 0 6vw 10px;
+      }
+
+      h1 { margin: 0 0 6px; font-size: clamp(28px, 4vw, 46px); }
+
+      .subtitle { color: var(--muted); max-width: 520px; }
+
+      main { display: block; padding: 20px 6vw 50px; }
+
+      .card {
+        background: rgba(18, 26, 36, 0.92);
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+      }
+
+      .card h2 { margin: 0 0 12px; font-size: 18px; }
+      .card-desc { margin: -6px 0 14px; color: var(--muted); font-size: 13px; }
+
+      .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+      .stack { display: flex; flex-direction: column; gap: 12px; }
+
+      input, select, button, a { font-family: inherit; font-size: 14px; }
+
+      input, select {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: var(--panel-2);
+        color: var(--ink);
+      }
+
+      input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+
+      button, .nav-link {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(120deg, var(--accent), #ff9f45);
+        color: #1a1405;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button.ghost, .nav-link.ghost {
+        background: transparent;
+        border: 1px solid var(--stroke);
+        color: var(--ink);
+      }
+
+      /* Summary grid */
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .summary-tile {
+        background: var(--panel-2);
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+
+      .summary-tile .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .summary-tile .value {
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .value.positive { color: var(--accent-2); }
+      .value.negative { color: #ff6b6b; }
+      .value.neutral  { color: var(--ink); }
+
+      /* Transaction table */
+      .tx-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .tx-table thead th {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--stroke);
+        color: var(--muted);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .tx-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+      .tx-table tbody td {
+        padding: 10px 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        vertical-align: middle;
+      }
+
+      .type-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .type-deposit, .type-transfer_in  { background: rgba(77,215,191,0.15); color: var(--accent-2); }
+      .type-withdrawal, .type-transfer_out { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+      .type-fee { background: rgba(246,196,83,0.15); color: var(--accent); }
+
+      .amount-positive { color: var(--accent-2); }
+      .amount-negative { color: #ff6b6b; }
+
+      .empty-state {
+        text-align: center;
+        color: var(--muted);
+        padding: 32px 0;
+        font-size: 14px;
+      }
+
+      .error-message {
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid #ff6b6b;
+        color: #ff6b6b;
+        font-size: 14px;
+      }
+
+      #resultsSection { display: none; }
+
+      @media (max-width: 900px) {
+        header { flex-direction: column; align-items: flex-start; }
+        .tx-table { font-size: 12px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Statements</h1>
+        <p class="subtitle">View an account statement for any date range.</p>
+      </div>
+      <div class="header-actions">
+        <button id="logoutBtn" class="ghost">Logout</button>
+      </div>
+    </header>
+
+    <nav class="nav-links">
+      <a class="nav-link ghost" href="/app">Dashboard</a>
+      <a class="nav-link ghost" href="/accounts">Accounts</a>
+      <a class="nav-link ghost" href="/transfers">Transfers</a>
+      <a class="nav-link ghost" href="/cards">Cards</a>
+      <a class="nav-link" href="/statements">Statements</a>
+    </nav>
+
+    <main>
+      <!-- Query form -->
+      <div class="card">
+        <h2>Request Statement</h2>
+        <p class="card-desc">Select an account and date range, then click Get Statement.</p>
+        <div class="stack">
+          <div class="row">
+            <select id="accountSelect">
+              <option value="">Select account…</option>
+            </select>
+          </div>
+          <div class="row">
+            <input type="date" id="startDate" />
+            <input type="date" id="endDate" />
+            <button id="fetchBtn">Get Statement</button>
+          </div>
+          <div id="errorMsg"></div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsSection">
+        <div class="card">
+          <h2 id="statementTitle">Statement</h2>
+          <p class="card-desc" id="statementSubtitle"></p>
+          <div class="summary-grid">
+            <div class="summary-tile">
+              <div class="label">Opening Balance</div>
+              <div class="value neutral" id="openingBal">—</div>
+            </div>
+            <div class="summary-tile">
+              <div class="label">Closing Balance</div>
+              <div class="value neutral" id="closingBal">—</div>
+            </div>
+            <div class="summary-tile">
+              <div class="label">Total Deposits</div>
+              <div class="value positive" id="totalDeposits">—</div>
+            </div>
+            <div class="summary-tile">
+              <div class="label">Total Withdrawals</div>
+              <div class="value negative" id="totalWithdrawals">—</div>
+            </div>
+            <div class="summary-tile">
+              <div class="label">Transactions</div>
+              <div class="value neutral" id="txCount">—</div>
+            </div>
+          </div>
+
+          <div id="txTableWrap">
+            <table class="tx-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th style="text-align:right">Amount</th>
+                  <th style="text-align:right">Balance After</th>
+                </tr>
+              </thead>
+              <tbody id="txBody"></tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display:none">
+              No transactions in this date range.
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // ── Auth guard ────────────────────────────────────────────────────────────
+      const state = {
+        accessToken: localStorage.getItem("accessToken") || "",
+      };
+      if (!sessionStorage.getItem("sessionAuthed") || !state.accessToken) {
+        window.location.href = "/";
+      }
+
+      // ── Helpers ───────────────────────────────────────────────────────────────
+      function $(id) { return document.getElementById(id); }
+
+      function fmt(cents) {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency", currency: "USD",
+        }).format(cents / 100);
+      }
+
+      function fmtDate(iso) {
+        return new Date(iso).toLocaleDateString("en-US", {
+          month: "short", day: "numeric", year: "numeric",
+        });
+      }
+
+      function setError(msg) {
+        $("errorMsg").innerHTML = msg
+          ? `<div class="error-message">${msg}</div>`
+          : "";
+      }
+
+      // ── API ───────────────────────────────────────────────────────────────────
+      async function api(path, options = {}) {
+        const headers = { "Content-Type": "application/json", ...options.headers };
+        if (state.accessToken) headers.Authorization = `Bearer ${state.accessToken}`;
+        const res = await fetch(path, { ...options, headers });
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!res.ok) throw { status: res.status, data };
+        return data;
+      }
+
+      // ── Load accounts into selector ───────────────────────────────────────────
+      async function loadAccounts() {
+        const accounts = await api("/api/v1/accounts/");
+        const sel = $("accountSelect");
+        accounts.forEach((acc) => {
+          const opt = document.createElement("option");
+          opt.value = acc.id;
+          opt.textContent = `${acc.account_number} · ${acc.account_type} · ${fmt(acc.balance_cents)}`;
+          sel.appendChild(opt);
+        });
+      }
+
+      // ── Fetch and render statement ────────────────────────────────────────────
+      async function fetchStatement() {
+        setError("");
+        const accountId = $("accountSelect").value;
+        const start     = $("startDate").value;
+        const end       = $("endDate").value;
+
+        if (!accountId) { setError("Select an account."); return; }
+        if (!start)     { setError("Enter a start date."); return; }
+        if (!end)       { setError("Enter an end date."); return; }
+        if (start > end){ setError("Start date must be before end date."); return; }
+
+        let statement;
+        try {
+          statement = await api(
+            `/api/v1/statements/${accountId}?start=${start}&end=${end}`
+          );
+        } catch (err) {
+          setError(err.data?.detail || "Failed to fetch statement.");
+          return;
+        }
+
+        renderSummary(statement, start, end);
+        renderTransactions(statement.transactions);
+        $("resultsSection").style.display = "block";
+        $("resultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // ── Render summary tiles ──────────────────────────────────────────────────
+      function renderSummary(s, start, end) {
+        const sel     = $("accountSelect");
+        const accText = sel.options[sel.selectedIndex].text;
+        $("statementTitle").textContent   = `Statement — ${accText}`;
+        $("statementSubtitle").textContent = `${fmtDate(start + "T00:00:00")} to ${fmtDate(end + "T00:00:00")}`;
+        $("openingBal").textContent       = fmt(s.opening_balance_cents);
+        $("closingBal").textContent       = fmt(s.closing_balance_cents);
+        $("totalDeposits").textContent    = fmt(s.total_deposits_cents);
+        $("totalWithdrawals").textContent = fmt(s.total_withdrawals_cents);
+        $("txCount").textContent          = s.transaction_count;
+      }
+
+      // ── Render transaction rows ───────────────────────────────────────────────
+      function renderTransactions(txs) {
+        const tbody = $("txBody");
+        tbody.innerHTML = "";
+
+        if (!txs.length) {
+          $("txTableWrap").querySelector("table").style.display = "none";
+          $("emptyState").style.display = "block";
+          return;
+        }
+
+        $("txTableWrap").querySelector("table").style.display = "";
+        $("emptyState").style.display = "none";
+
+        const isDebit = (type) =>
+          type === "withdrawal" || type === "transfer_out" || type === "fee";
+
+        txs.forEach((tx) => {
+          const debit     = isDebit(tx.transaction_type);
+          const amtClass  = debit ? "amount-negative" : "amount-positive";
+          const amtPrefix = debit ? "−" : "+";
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fmtDate(tx.created_at)}</td>
+            <td><span class="type-badge type-${tx.transaction_type}">${tx.transaction_type.replace("_", " ")}</span></td>
+            <td style="color:var(--muted)">${tx.description || "—"}</td>
+            <td style="text-align:right" class="${amtClass}">${amtPrefix}${fmt(tx.amount_cents)}</td>
+            <td style="text-align:right">${fmt(tx.balance_after_cents)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // ── Wire up events ────────────────────────────────────────────────────────
+      $("fetchBtn").addEventListener("click", fetchStatement);
+
+      $("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        sessionStorage.removeItem("sessionAuthed");
+        window.location.href = "/";
+      });
+
+      // Set default date range to current month
+      (function setDefaultDates() {
+        const now   = new Date();
+        const y     = now.getFullYear();
+        const m     = String(now.getMonth() + 1).padStart(2, "0");
+        const first = `${y}-${m}-01`;
+        const last  = `${y}-${m}-${String(now.getDate()).padStart(2, "0")}`;
+        $("startDate").value = first;
+        $("endDate").value   = last;
+      })();
+
+      // ── Init ──────────────────────────────────────────────────────────────────
+      loadAccounts().catch(() => setError("Could not load accounts."));
+    </script>
+  </body>
+</html>
