@@ -8,7 +8,7 @@ from app.models.enums import AccountStatus, AccountType
 class AccountCreate(BaseModel):
     account_type: AccountType
     currency: str = "USD"
-    initial_deposit: float | None = Field(default=None, ge=0)
+    initial_deposit_cents: int | None = Field(default=None, ge=0)
 
 
 class AccountStatusUpdate(BaseModel):
@@ -21,7 +21,7 @@ class AccountResponse(BaseModel):
     account_number: str
     account_type: AccountType
     status: AccountStatus
-    balance: float
+    balance_cents: int
     currency: str
     created_at: datetime
 

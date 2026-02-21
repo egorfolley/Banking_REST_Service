@@ -16,19 +16,19 @@ router = APIRouter()
 def get_statement(
     account_id: str,
     request: Request,
-    start_date: date = Query(...),
-    end_date: date = Query(...),
+    start: date = Query(...),
+    end: date = Query(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if start_date > end_date:
+    if start > end:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="start_date must be before end_date",
+            detail="start must be before end",
         )
 
     account = get_account_for_user(account_id, current_user, db)
-    result = build_statement(db, account.id, start_date, end_date)
+    result = build_statement(db, account.id, start, end)
 
     log_action(
         db,
@@ -36,7 +36,7 @@ def get_statement(
         action="statement",
         resource_type="account",
         resource_id=account.id,
-        details=f"start={start_date} end={end_date}",
+        details=f"start={start} end={end}",
         ip_address=request.client.host if request.client else None,
     )
     db.commit()

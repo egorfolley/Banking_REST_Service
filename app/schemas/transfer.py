@@ -9,7 +9,7 @@ class TransferCreate(BaseModel):
     idempotency_key: str = Field(min_length=8)
     from_account_id: str
     to_account_id: str
-    amount: float = Field(gt=0)
+    amount_cents: int = Field(gt=0)
     description: str | None = None
 
     @field_validator("to_account_id")
@@ -26,7 +26,7 @@ class TransferResponse(BaseModel):
     idempotency_key: str
     from_account_id: str
     to_account_id: str
-    amount: float
+    amount_cents: int
     description: str | None
     status: TransferStatus
     completed_at: datetime | None

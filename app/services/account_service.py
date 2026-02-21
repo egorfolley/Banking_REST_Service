@@ -26,7 +26,7 @@ def create_account(
     holder: AccountHolder,
     account_type,
     currency: str,
-    initial_deposit: float | None,
+    initial_deposit_cents: int | None,
 ) -> Account:
     account_number = _unique_account_number(db)
     account = Account(
@@ -34,16 +34,16 @@ def create_account(
         account_number=account_number,
         account_type=account_type,
         currency=currency,
-        balance=0.0,
+        balance_cents=0,
     )
     db.add(account)
     db.flush()
 
-    if initial_deposit and initial_deposit > 0:
+    if initial_deposit_cents and initial_deposit_cents > 0:
         apply_deposit(
             db,
             account,
-            amount=initial_deposit,
+            amount_cents=initial_deposit_cents,
             description="Initial deposit",
             transaction_type=TransactionType.deposit,
         )

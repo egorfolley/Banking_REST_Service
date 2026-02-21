@@ -39,7 +39,7 @@ A RESTful banking API built with AI-driven development practices. This service p
 ## TODO
 
 * [X] TC: Establish tech-stack - prompt to select the tech-stack for the project
-* [ ] SC: Source code with core components for service/DB development, config files, test units
+* [X] SC: Source code with core components for service/DB development, config files, test units
 * [ ] BP: Test client application for the flow + UI
 * [ ] DocAI: Track progress of AI usage - report of tools, prompts, challenges solved with AI, manual interventions
 * [ ] DocSecurity: Security considerations document

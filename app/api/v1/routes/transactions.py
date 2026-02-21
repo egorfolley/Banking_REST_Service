@@ -28,7 +28,7 @@ def deposit(
     db: Session = Depends(get_db),
 ):
     account = get_account_for_user(account_id, current_user, db)
-    tx = apply_deposit(db, account, payload.amount, payload.description)
+    tx = apply_deposit(db, account, payload.amount_cents, payload.description)
     db.flush()
     log_action(
         db,
@@ -53,7 +53,7 @@ def withdraw(
     db: Session = Depends(get_db),
 ):
     account = get_account_for_user(account_id, current_user, db)
-    tx = apply_withdrawal(db, account, payload.amount, payload.description)
+    tx = apply_withdrawal(db, account, payload.amount_cents, payload.description)
     db.flush()
     log_action(
         db,

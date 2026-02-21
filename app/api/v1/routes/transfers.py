@@ -38,7 +38,7 @@ def transfer_funds(
             from_account,
             to_account,
             idempotency_key=payload.idempotency_key,
-            amount=payload.amount,
+            amount_cents=payload.amount_cents,
             description=payload.description,
         )
 

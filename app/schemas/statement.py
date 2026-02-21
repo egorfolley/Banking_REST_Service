@@ -4,9 +4,9 @@ from app.schemas.transaction import TransactionResponse
 
 
 class StatementResponse(BaseModel):
-    opening_balance: float
-    closing_balance: float
-    total_deposits: float
-    total_withdrawals: float
+    opening_balance_cents: int
+    closing_balance_cents: int
+    total_deposits_cents: int
+    total_withdrawals_cents: int
     transaction_count: int
     transactions: list[TransactionResponse]

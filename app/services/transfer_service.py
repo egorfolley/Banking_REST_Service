@@ -15,10 +15,19 @@ def create_transfer(
     from_account: Account,
     to_account: Account,
     idempotency_key: str,
-    amount: float,
+    amount_cents: int,
     description: str | None,
 ) -> Transfer:
-    amount = round(amount, 2)
+    if from_account.id == to_account.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Source and destination accounts must differ",
+        )
+    if amount_cents <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Amount must be greater than zero",
+        )
     if from_account.status != AccountStatus.active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -38,7 +47,7 @@ def create_transfer(
         idempotency_key=idempotency_key,
         from_account_id=from_account.id,
         to_account_id=to_account.id,
-        amount=amount,
+        amount_cents=amount_cents,
         description=description,
         status=TransferStatus.pending,
     )
@@ -48,7 +57,7 @@ def create_transfer(
     apply_withdrawal(
         db,
         from_account,
-        amount=amount,
+        amount_cents=amount_cents,
         description=description or "Transfer out",
         transaction_type=TransactionType.transfer_out,
         reference_id=transfer.id,
@@ -56,7 +65,7 @@ def create_transfer(
     apply_deposit(
         db,
         to_account,
-        amount=amount,
+        amount_cents=amount_cents,
         description=description or "Transfer in",
         transaction_type=TransactionType.transfer_in,
         reference_id=transfer.id,

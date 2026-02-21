@@ -16,7 +16,7 @@ def build_statement(db: Session, account_id: str, start_date, end_date):
         .where(Transaction.account_id == account_id, Transaction.created_at < start_dt)
         .order_by(desc(Transaction.created_at))
     )
-    opening_balance = last_before.balance_after if last_before else 0.0
+    opening_balance_cents = last_before.balance_after_cents if last_before else 0
 
     transactions = db.scalars(
         select(Transaction)
@@ -28,21 +28,25 @@ def build_statement(db: Session, account_id: str, start_date, end_date):
         .order_by(Transaction.created_at)
     ).all()
 
-    closing_balance = opening_balance
+    closing_balance_cents = opening_balance_cents
     if transactions:
-        closing_balance = transactions[-1].balance_after
+        closing_balance_cents = transactions[-1].balance_after_cents
 
     deposit_types = {TransactionType.deposit, TransactionType.transfer_in}
     withdrawal_types = {TransactionType.withdrawal, TransactionType.transfer_out, TransactionType.fee}
 
-    total_deposits = sum(t.amount for t in transactions if t.transaction_type in deposit_types)
-    total_withdrawals = sum(t.amount for t in transactions if t.transaction_type in withdrawal_types)
+    total_deposits_cents = sum(
+        t.amount_cents for t in transactions if t.transaction_type in deposit_types
+    )
+    total_withdrawals_cents = sum(
+        t.amount_cents for t in transactions if t.transaction_type in withdrawal_types
+    )
 
     return {
-        "opening_balance": round(opening_balance, 2),
-        "closing_balance": round(closing_balance, 2),
-        "total_deposits": round(total_deposits, 2),
-        "total_withdrawals": round(total_withdrawals, 2),
+        "opening_balance_cents": opening_balance_cents,
+        "closing_balance_cents": closing_balance_cents,
+        "total_deposits_cents": total_deposits_cents,
+        "total_withdrawals_cents": total_withdrawals_cents,
         "transaction_count": len(transactions),
         "transactions": transactions,
     }

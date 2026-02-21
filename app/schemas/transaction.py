@@ -6,12 +6,12 @@ from app.models.enums import TransactionStatus, TransactionType
 
 
 class DepositRequest(BaseModel):
-    amount: float = Field(gt=0)
+    amount_cents: int = Field(gt=0)
     description: str | None = None
 
 
 class WithdrawRequest(BaseModel):
-    amount: float = Field(gt=0)
+    amount_cents: int = Field(gt=0)
     description: str | None = None
 
 
@@ -19,8 +19,8 @@ class TransactionResponse(BaseModel):
     id: str
     account_id: str
     transaction_type: TransactionType
-    amount: float
-    balance_after: float
+    amount_cents: int
+    balance_after_cents: int
     description: str | None
     reference_id: str | None
     status: TransactionStatus

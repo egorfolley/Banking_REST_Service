@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import Enum, ForeignKey, Numeric, String
+from sqlalchemy import Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -19,8 +19,8 @@ class Transaction(TimestampMixin, Base):
         nullable=False,
     )
     transaction_type: Mapped[TransactionType] = mapped_column(Enum(TransactionType), nullable=False)
-    amount: Mapped[float] = mapped_column(Numeric(12, 2, asdecimal=False), nullable=False)
-    balance_after: Mapped[float] = mapped_column(Numeric(12, 2, asdecimal=False), nullable=False)
+    amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    balance_after_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     reference_id: Mapped[str | None] = mapped_column(String, index=True, nullable=True)
     status: Mapped[TransactionStatus] = mapped_column(

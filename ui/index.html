@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Banking REST Service UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Banking REST Service</p>
+        <h1>Control Center</h1>
+        <p class="subtitle">
+          A lightweight, security-first console for your FastAPI backend.
+        </p>
+      </div>
+      <div class="base-url">
+        <label for="baseUrl">API Base URL</label>
+        <input id="baseUrl" type="text" value="http://localhost:8000" />
+        <button id="pingBtn" class="ghost">Ping</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Auth</h2>
+        <div class="stack">
+          <div class="row">
+            <input id="signupEmail" placeholder="email" />
+            <input id="signupPassword" placeholder="password" type="password" />
+            <button id="signupBtn">Sign up</button>
+          </div>
+          <div class="row">
+            <input id="loginEmail" placeholder="email" />
+            <input id="loginPassword" placeholder="password" type="password" />
+            <button id="loginBtn">Login</button>
+          </div>
+          <div class="row">
+            <button id="refreshBtn" class="ghost">Refresh Token</button>
+            <button id="meBtn" class="ghost">Me</button>
+            <button id="logoutBtn" class="ghost">Logout</button>
+          </div>
+          <pre id="authOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Account Holder</h2>
+        <div class="stack">
+          <div class="row">
+            <input id="holderFirst" placeholder="first_name" />
+            <input id="holderLast" placeholder="last_name" />
+          </div>
+          <div class="row">
+            <input id="holderDob" placeholder="YYYY-MM-DD" />
+            <input id="holderPhone" placeholder="phone" />
+          </div>
+          <div class="row">
+            <input id="holderAddress" placeholder="address" />
+            <input id="holderSsn" placeholder="ssn_last_four" />
+          </div>
+          <div class="row">
+            <button id="createHolderBtn">Create</button>
+            <button id="getHolderBtn" class="ghost">Get</button>
+            <button id="updateHolderBtn" class="ghost">Update</button>
+          </div>
+          <pre id="holderOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Accounts</h2>
+        <div class="stack">
+          <div class="row">
+            <select id="accountType">
+              <option value="checking">checking</option>
+              <option value="savings">savings</option>
+            </select>
+            <input id="accountCurrency" placeholder="currency" value="USD" />
+            <input id="initialDeposit" placeholder="initial_deposit_cents" />
+            <button id="createAccountBtn">Create</button>
+          </div>
+          <div class="row">
+            <input id="accountId" placeholder="account_id" />
+            <select id="accountStatus">
+              <option value="active">active</option>
+              <option value="frozen">frozen</option>
+              <option value="closed">closed</option>
+            </select>
+            <button id="getAccountBtn" class="ghost">Get</button>
+            <button id="listAccountsBtn" class="ghost">List</button>
+            <button id="updateAccountStatusBtn" class="ghost">Update Status</button>
+          </div>
+          <pre id="accountsOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Transactions</h2>
+        <div class="stack">
+          <div class="row">
+            <input id="txAccountId" placeholder="account_id" />
+            <input id="txAmount" placeholder="amount_cents" />
+            <input id="txDesc" placeholder="description" />
+          </div>
+          <div class="row">
+            <button id="depositBtn">Deposit</button>
+            <button id="withdrawBtn">Withdraw</button>
+          </div>
+          <div class="row">
+            <input id="txPage" placeholder="page" value="1" />
+            <input id="txPageSize" placeholder="page_size" value="20" />
+            <input id="txType" placeholder="transaction_type" />
+            <button id="listTxBtn" class="ghost">List</button>
+          </div>
+          <pre id="txOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Transfers</h2>
+        <div class="stack">
+          <div class="row">
+            <input id="transferKey" placeholder="idempotency_key" />
+            <input id="transferFrom" placeholder="from_account_id" />
+          </div>
+          <div class="row">
+            <input id="transferTo" placeholder="to_account_id" />
+            <input id="transferAmount" placeholder="amount_cents" />
+          </div>
+          <div class="row">
+            <input id="transferDesc" placeholder="description" />
+            <button id="transferBtn">Send Transfer</button>
+          </div>
+          <pre id="transferOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Cards</h2>
+        <div class="stack">
+          <div class="row">
+            <input id="cardAccountId" placeholder="account_id" />
+            <input id="cardNumber" placeholder="card_number" />
+          </div>
+          <div class="row">
+            <select id="cardType">
+              <option value="debit">debit</option>
+              <option value="credit">credit</option>
+            </select>
+            <input id="cardExpiryMonth" placeholder="expiry_month" />
+            <input id="cardExpiryYear" placeholder="expiry_year" />
+            <input id="cardDailyLimit" placeholder="daily_limit" />
+            <button id="createCardBtn">Create</button>
+          </div>
+          <div class="row">
+            <input id="cardId" placeholder="card_id" />
+            <select id="cardStatus">
+              <option value="active">active</option>
+              <option value="frozen">frozen</option>
+              <option value="cancelled">cancelled</option>
+            </select>
+            <input id="cardLimit" placeholder="daily_limit" />
+            <button id="listCardsBtn" class="ghost">List</button>
+            <button id="getCardBtn" class="ghost">Get</button>
+            <button id="updateCardStatusBtn" class="ghost">Update Status</button>
+            <button id="updateCardLimitBtn" class="ghost">Update Limit</button>
+          </div>
+          <pre id="cardsOutput" class="output"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Statements</h2>
+        <div class="stack">
+          <div class="row">
+            <input id="statementAccountId" placeholder="account_id" />
+            <input id="statementStart" placeholder="start YYYY-MM-DD" />
+            <input id="statementEnd" placeholder="end YYYY-MM-DD" />
+            <button id="statementBtn">Get Statement</button>
+          </div>
+          <pre id="statementOutput" class="output"></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">Built for quick testing and demos.</footer>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

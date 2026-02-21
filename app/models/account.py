@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import Enum, ForeignKey, Numeric, String
+from sqlalchemy import Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -25,7 +25,7 @@ class Account(TimestampMixin, Base):
         default=AccountStatus.active,
         nullable=False,
     )
-    balance: Mapped[float] = mapped_column(Numeric(12, 2, asdecimal=False), default=0.0)
+    balance_cents: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     currency: Mapped[str] = mapped_column(String(3), default="USD", nullable=False)
 
     holder = relationship("AccountHolder", back_populates="accounts")
