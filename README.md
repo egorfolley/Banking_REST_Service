@@ -24,7 +24,7 @@ A RESTful banking API built with AI-driven development practices. This service p
 
 ## Action steps
 
-1. Finalize project scope (MVP vs optional features)
+1. Finalize project scope
 2. Establish technology stack and AI-assisted workflow
 3. Define technical architecture and API endpoint contracts
 4. Implement database models and schema migrations
