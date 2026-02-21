@@ -22,29 +22,6 @@ A RESTful banking API built with AI-driven development practices. This service p
    ● Unit tests for business logic
    ● Integration tests for API endpoints
 
-## Action steps
-
-1. Finalize project scope
-2. Establish technology stack and AI-assisted workflow
-3. Define technical architecture and API endpoint contracts
-4. Implement database models and schema migrations
-5. Implement authentication and account holder flows
-6. Implement accounts, transactions, and transfer logic
-7. Implement statements and cards (cards optional if time-constrained)
-8. Manually test API flows (Swagger/Postman/curl)
-9. Add test suite for critical functionality
-10. Complete documentation (security, roadmap, AI usage report/log)
-11. Final review, cleanup, and submission packaging
-
-## TODO
-
-* [X] TC: Establish tech-stack - prompt to select the tech-stack for the project
-* [X] SC: Source code with core components for service/DB development, config files, test units
-* [ ] BP: Test client application for the flow + UI
-* [ ] DocAI: Track progress of AI usage - report of tools, prompts, challenges solved with AI, manual interventions
-* [ ] DocSecurity: Security considerations document
-* [ ] DocRoadmap: Roadmap document for future considerations
-
 ## Technology Stack
 
 | Layer            | Technology                                                       | Rationale                                                      |
@@ -152,3 +129,12 @@ flowchart TD
 **API Log Panel**
 
 * Bottom/right panel shows raw requests and responses for every action.
+
+## TODO
+
+* [X] TC: Establish tech-stack - prompt to select the tech-stack for the project
+* [X] SC: Source code with core components for service/DB development, config files, test units
+* [X] BP: Test client application for the flow + UI
+* [ ] DocAI: Track progress of AI usage - report of tools, prompts, challenges solved with AI, manual interventions
+* [ ] DocSecurity: Security considerations document
+* [ ] DocRoadmap: Roadmap document for future considerations
